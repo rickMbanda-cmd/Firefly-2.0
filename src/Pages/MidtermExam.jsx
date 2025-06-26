@@ -4,10 +4,7 @@ import DataEntryGrid from '../Components/DataEntryGrid';
 import { calculateMean, calculateRubric } from '../Utils/calculations';
 import { addResult, updateResult } from '../api/results';
 import ExamNavigation from '../Components/ExamNavigation';
-
-const initialStudents = [
-  { id: 1, name: '', math: '', english: '', science: '', mean: '', rubric: '', examType: 'midterm' }
-];
+import { getSubjectsByClass } from '../Utils/subjectsByClass';
 
 const MidtermExam = () => {
   const location = useLocation();
@@ -17,7 +14,17 @@ const MidtermExam = () => {
     new URLSearchParams(location.search).get('class') ||
     'Playgroup';
 
-  const [students, setStudents] = useState(initialStudents);
+  const subjects = getSubjectsByClass(selectedClass);
+  
+  const createInitialStudent = () => {
+    const student = { id: 1, name: '', mean: '', rubric: '', examType: 'midterm', class: selectedClass };
+    subjects.forEach(subject => {
+      student[subject] = '';
+    });
+    return student;
+  };
+
+  const [students, setStudents] = useState([createInitialStudent()]);
 
   const saveStudent = async (student) => {
     const studentWithClass = { ...student, class: selectedClass };
@@ -33,15 +40,12 @@ const MidtermExam = () => {
       return prevStudents.map(student => {
         if (student.id === id) {
           const newStudent = { ...student, [field]: value, examType: 'midterm', class: selectedClass };
-          const parsedMath = parseFloat(newStudent.math);
-          const parsedEnglish = parseFloat(newStudent.english);
-          const parsedScience = parseFloat(newStudent.science);
-          if (
-            !isNaN(parsedMath) &&
-            !isNaN(parsedEnglish) &&
-            !isNaN(parsedScience)
-          ) {
-            newStudent.mean = calculateMean([parsedMath, parsedEnglish, parsedScience]);
+          
+          // Calculate mean using all subjects for this class
+          const subjectScores = subjects.map(subject => parseFloat(newStudent[subject])).filter(score => !isNaN(score));
+          
+          if (subjectScores.length === subjects.length) {
+            newStudent.mean = calculateMean(subjectScores);
             newStudent.rubric = calculateRubric(newStudent.mean);
           } else {
             newStudent.mean = '';
@@ -56,21 +60,30 @@ const MidtermExam = () => {
 
   const addStudentRow = () => {
     const newId = students.length ? Math.max(...students.map(s => s.id)) + 1 : 1;
-    setStudents([
-      ...students,
-      { id: newId, name: '', math: '', english: '', science: '', mean: '', rubric: '', examType: 'midterm', class: selectedClass }
-    ]);
+    const newStudent = { id: newId, name: '', mean: '', rubric: '', examType: 'midterm', class: selectedClass };
+    subjects.forEach(subject => {
+      newStudent[subject] = '';
+    });
+    setStudents([...students, newStudent]);
   };
 
   return (
     <div className="exam-module-container">
       <ExamNavigation />
-      <h1>Midterm Exam Results - {selectedClass}</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+        <img 
+          src="/logschool.png" 
+          alt="School Logo" 
+          style={{ height: '40px', width: 'auto' }}
+        />
+        <h1>Midterm Exam Results - {selectedClass}</h1>
+      </div>
       <DataEntryGrid
         students={students}
         updateStudent={updateStudent}
         addStudentRow={addStudentRow}
         saveStudent={saveStudent}
+        selectedClass={selectedClass}
       />
     </div>
   );

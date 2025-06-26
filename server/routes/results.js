@@ -13,9 +13,32 @@ router.get('/', async (req, res) => {
 });
 
 // Get results by exam type
-router.get('/:examType', async (req, res) => {
+router.get('/exam/:examType', async (req, res) => {
   try {
     const results = await Result.find({ examType: req.params.examType });
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get results by class
+router.get('/class/:className', async (req, res) => {
+  try {
+    const results = await Result.find({ class: req.params.className });
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get results by class and exam type
+router.get('/class/:className/exam/:examType', async (req, res) => {
+  try {
+    const results = await Result.find({ 
+      class: req.params.className, 
+      examType: req.params.examType 
+    });
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });

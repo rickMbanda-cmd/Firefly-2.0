@@ -18,3 +18,33 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
 app.use('/api/results', resultsRouter);
 
 app.listen(5000, () => console.log('Server running on port 5000'));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
