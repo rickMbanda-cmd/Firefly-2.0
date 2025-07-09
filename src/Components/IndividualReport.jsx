@@ -22,11 +22,11 @@ const printStyles = `
       margin: 0;
       padding: 0;
     }
-    
+
     .no-print, button, nav, .exam-nav {
       display: none !important;
     }
-    
+
     .print-container {
       margin: 0 !important;
       padding: 10px !important;
@@ -35,26 +35,26 @@ const printStyles = `
       max-width: none !important;
       width: 100% !important;
     }
-    
+
     table {
       page-break-inside: avoid;
       border-collapse: collapse !important;
     }
-    
+
     tr {
       page-break-inside: avoid;
     }
-    
+
     .page-break {
       page-break-before: always;
     }
-    
+
     img {
       max-width: 100% !important;
       height: auto !important;
     }
   }
-  
+
   @page {
     margin: 0.5in;
     size: A4;
@@ -106,10 +106,15 @@ const IndividualReport = ({ student, classData }) => {
   // Get subjects from the student's class
   const subjects = getSubjectsByClass(student.class);
 
-  // Extract subject marks
+  // Extract subject marks and calculate total
   const subjectMarks = {};
+  let totalMarks = 0;
   subjects.forEach(subject => {
     subjectMarks[subject] = student[subject];
+    const score = parseFloat(student[subject]);
+    if (!isNaN(score)) {
+      totalMarks += score;
+    }
   });
 
   // Calculate class statistics
@@ -182,7 +187,7 @@ const IndividualReport = ({ student, classData }) => {
     },
     reportTitle: {
       color: '#2c3e50',
-      fontSize: '28px',
+      fontSize: '20px',
       fontWeight: 'bold',
       marginBottom: '8px'
     },
@@ -224,7 +229,10 @@ const IndividualReport = ({ student, classData }) => {
     },
     tableCell: {
       padding: '12px',
-      borderBottom: '1px solid #ecf0f1'
+      borderBottom: '1px solid #ecf0f1',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
     tableRowEven: {
       backgroundColor: '#f8f9fa'
@@ -319,6 +327,10 @@ const IndividualReport = ({ student, classData }) => {
           <span style={styles.value}>{studentPosition || '-'}</span>
         </div>
         <div style={styles.infoRow}>
+          <span style={styles.label}>Total Marks:</span>
+          <span style={styles.value}>{totalMarks.toFixed(0)}</span>
+        </div>
+        <div style={styles.infoRow}>
           <span style={styles.label}>Overall Mean:</span>
           <span style={styles.value}>
             {typeof student.mean === 'number' ? student.mean.toFixed(1) : '-'}
@@ -327,6 +339,10 @@ const IndividualReport = ({ student, classData }) => {
         <div style={styles.infoRow}>
           <span style={styles.label}>Overall Rubric:</span>
           <span style={styles.value}>{overallRubric}</span>
+        </div>
+        <div style={{...styles.infoRow, marginTop: '10px'}}>
+          <span style={{...styles.label, fontSize: '14px', fontStyle: 'italic'}}>Rubric Remark:</span>
+          <span style={{...styles.value, fontSize: '14px', fontStyle: 'italic'}}>{overallRemark}</span>
         </div>
       </div>
 
@@ -392,9 +408,9 @@ const IndividualReport = ({ student, classData }) => {
         </div>
       )}
 
-      {/* Overall Remarks */}
+      {/* Overall Rubrics */}
       <div style={styles.remarksSection}>
-        <h3 style={{ color: '#2c3e50', marginBottom: '15px', fontSize: '18px' }}>Overall Remarks</h3>
+        <h3 style={{ color: '#2c3e50', marginBottom: '15px', fontSize: '18px' }}>Overall Rubrics</h3>
         <p style={styles.overallRemark}>{overallRemark}</p>
       </div>
 

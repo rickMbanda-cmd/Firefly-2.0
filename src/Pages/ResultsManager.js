@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   fetchResults,
@@ -24,12 +23,12 @@ const createEmptyResult = (examType, selectedClass) => {
     examType: examType,
     class: selectedClass || ''
   };
-  
+
   // Initialize all subjects to empty string
   subjects.forEach(subject => {
     result[subject] = '';
   });
-  
+
   return result;
 };
 
@@ -60,7 +59,7 @@ const ResultsManager = () => {
     setEditingId(result._id);
     setSelectedExamType(result.examType);
     setSelectedClass(result.class);
-    
+
     const editForm = {
       name: result.name,
       mean: result.mean,
@@ -68,15 +67,15 @@ const ResultsManager = () => {
       examType: result.examType,
       class: result.class || ''
     };
-    
+
     // Get subjects for the result's class
     const resultSubjects = getSubjectsByClass(result.class);
-    
+
     // Add all subjects for this class
     resultSubjects.forEach(subject => {
       editForm[subject] = result[subject] || '';
     });
-    
+
     setForm(editForm);
   };
 
@@ -89,7 +88,7 @@ const ResultsManager = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    
+
     if (!form.class) {
       alert('Please select a class.');
       return;
@@ -98,13 +97,13 @@ const ResultsManager = () => {
     // Calculate mean from current subjects
     const subjectScores = currentSubjects.map(subject => parseFloat(form[subject])).filter(score => !isNaN(score));
     const mean = subjectScores.length > 0 ? subjectScores.reduce((a, b) => a + b, 0) / subjectScores.length : 0;
-    
+
     const formWithMean = { 
       ...form, 
       mean: mean.toFixed(2),
       rubric: getRubric(mean)
     };
-    
+
     if (editingId) {
       const updated = await updateResult(editingId, formWithMean);
       setResults(results.map(r => (r._id === editingId ? updated : r)));
@@ -254,8 +253,14 @@ const ResultsManager = () => {
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
       border: '1px solid #f1f5f9'
     },
+    tableWrapper: {
+      overflowX: 'auto',
+      overflowY: 'auto',
+      maxHeight: '600px'
+    },
     table: {
       width: '100%',
+      minWidth: '800px',
       borderCollapse: 'collapse',
       fontSize: '0.95rem'
     },
@@ -275,7 +280,11 @@ const ResultsManager = () => {
       padding: '16px 12px',
       borderBottom: '1px solid #f1f5f9',
       color: '#374151',
-      fontWeight: '500'
+      fontWeight: '500',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      maxWidth: '200px'
     },
     row: {
       transition: 'all 0.3s ease',
@@ -327,7 +336,7 @@ const ResultsManager = () => {
           <h1 style={styles.title}>Results Manager</h1>
           <p style={styles.subtitle}>Manage and organize student examination results</p>
         </div>
-        
+
         <div style={styles.filtersContainer}>
           <div style={styles.filterGroup}>
             <label style={styles.label}>Exam Type</label>
@@ -347,7 +356,7 @@ const ResultsManager = () => {
               ))}
             </select>
           </div>
-          
+
           <div style={styles.filterGroup}>
             <label style={styles.label}>Class Filter</label>
             <select
@@ -386,7 +395,7 @@ const ResultsManager = () => {
                 ':focus': { borderColor: '#10b981', boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.1)' }
               }}
             />
-            
+
             {currentSubjects.map(subject => (
               <input 
                 key={subject}
@@ -401,7 +410,7 @@ const ResultsManager = () => {
                 max="100"
               />
             ))}
-            
+
             <select
               name="class"
               value={form.class || ''}
@@ -414,7 +423,7 @@ const ResultsManager = () => {
                 <option key={cls} value={cls}>{cls}</option>
               ))}
             </select>
-            
+
             <button 
               type="submit" 
               style={{
@@ -424,7 +433,7 @@ const ResultsManager = () => {
             >
               {editingId ? '💾 Update' : '➕ Add'} Result
             </button>
-            
+
             {editingId && (
               <button 
                 type="button" 
@@ -439,11 +448,12 @@ const ResultsManager = () => {
             )}
           </form>
         </div>
-        
+
         <div style={styles.tableContainer}>
           {filteredResults.length > 0 ? (
-            <table style={styles.table}>
-              <thead style={styles.tableHeader}>
+            <div style={styles.tableWrapper}>
+              <table style={styles.table}>
+                <thead style={styles.tableHeader}>
                 <tr>
                   <th style={styles.th}>👤 Student Name</th>
                   {currentSubjects.map(subject => (
@@ -526,6 +536,7 @@ const ResultsManager = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           ) : (
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}>📊</div>

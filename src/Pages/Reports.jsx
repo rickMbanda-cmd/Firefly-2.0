@@ -176,36 +176,115 @@ const Reports = () => {
     );
   }
 
+  const modernStyles = {
+    container: {
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      minHeight: '100vh',
+      padding: '20px',
+      fontFamily: '"Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
+    },
+    contentWrapper: {
+      maxWidth: '1600px',
+      margin: '0 auto',
+      background: 'rgba(255, 255, 255, 0.95)',
+      borderRadius: '24px',
+      padding: '40px',
+      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+      backdropFilter: 'blur(10px)'
+    },
+    header: {
+      textAlign: 'center',
+      marginBottom: '40px'
+    },
+    title: {
+      fontSize: '3rem',
+      fontWeight: '700',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      marginBottom: '10px',
+      letterSpacing: '-1px'
+    },
+    subtitle: {
+      fontSize: '1.2rem',
+      color: '#6b7280',
+      fontWeight: '400'
+    },
+    filtersContainer: {
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      borderRadius: '16px',
+      padding: '24px',
+      marginBottom: '32px',
+      display: 'flex',
+      gap: '24px',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+    },
+    label: {
+      fontSize: '0.9rem',
+      fontWeight: '600',
+      color: '#374151',
+      letterSpacing: '0.5px',
+      marginRight: '12px'
+    },
+    select: {
+      padding: '12px 16px',
+      borderRadius: '12px',
+      border: '2px solid #e5e7eb',
+      fontSize: '1rem',
+      color: '#374151',
+      fontWeight: '500',
+      background: '#fff',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      outline: 'none',
+      minWidth: '160px'
+    },
+    sectionHeader: {
+      fontSize: '1.8rem',
+      fontWeight: '700',
+      color: '#1f2937',
+      marginBottom: '24px',
+      padding: '16px 0',
+      borderBottom: '3px solid #e5e7eb'
+    }
+  };
+
   return (
-    <div className="exam-module-container">
+    <div style={modernStyles.container}>
       <ExamNavigation />
-      <h1>Reports and Printing</h1>
-
-      {/* Global Filter Controls */}
-      <div className="no-print" style={{ ...styles.section, display: 'flex', gap: '1em', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div>
-          <label htmlFor="examFilter" style={{ marginRight: '0.5em' }}>
-            Filter by Exam:
-          </label>
-          <select
-            id="examFilter"
-            value={selectedExamType}
-            onChange={(e) => setSelectedExamType(e.target.value)}
-            style={{ padding: '0.5em', borderRadius: '4px', border: '1px solid #ccc' }}
-          >
-            {availableExamTypes.map(examType => (
-              <option key={examType} value={examType}>
-                {examType === 'opener' ? 'Opener' : 
-                 examType === 'midterm' ? 'Midterm' : 
-                 examType === 'endterm' ? 'Endterm' : examType}
-              </option>
-            ))}
-          </select>
+      <div style={modernStyles.contentWrapper}>
+        <div style={modernStyles.header}>
+          <h1 style={modernStyles.title}>Reports and Printing</h1>
+          <p style={modernStyles.subtitle}>Generate and print comprehensive student reports</p>
         </div>
-      </div>
 
-      <div style={styles.section}>
-        <h2>Individual Report</h2>
+        {/* Global Filter Controls */}
+        <div className="no-print" style={modernStyles.filtersContainer}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <label htmlFor="examFilter" style={modernStyles.label}>
+              Filter by Exam:
+            </label>
+            <select
+              id="examFilter"
+              value={selectedExamType}
+              onChange={(e) => setSelectedExamType(e.target.value)}
+              style={modernStyles.select}
+            >
+              {availableExamTypes.map(examType => (
+                <option key={examType} value={examType}>
+                  {examType === 'opener' ? 'Opener' : 
+                   examType === 'midterm' ? 'Midterm' : 
+                   examType === 'endterm' ? 'Endterm' : examType}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div style={styles.section}>
+          <h2 style={modernStyles.sectionHeader}>📄 Individual Report</h2>
 
         {/* Filters */}
         <div className="no-print" style={{ display: 'flex', gap: '1em', alignItems: 'center', marginBottom: '1em', flexWrap: 'wrap' }}>
@@ -305,6 +384,7 @@ const Reports = () => {
         >
           Print Class Marklist
         </button>
+      </div>
       </div>
     </div>
   );
