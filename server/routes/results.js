@@ -48,28 +48,9 @@ router.get('/class/:className/exam/:examType', async (req, res) => {
 // Add a new result (ensure class is saved)
 router.post('/', async (req, res) => {
   try {
-    const {
-      name,
-      math,
-      english,
-      science,
-      mean,
-      rubric,
-      examType,
-      class: studentClass // get class from request body
-    } = req.body;
-
-    const result = new Result({
-      name,
-      math,
-      english,
-      science,
-      mean,
-      rubric,
-      examType,
-      class: studentClass // save class
-    });
-
+    const resultData = { ...req.body };
+    
+    const result = new Result(resultData);
     await result.save();
     res.status(201).json(result);
   } catch (err) {
@@ -80,29 +61,11 @@ router.post('/', async (req, res) => {
 // Update a result (ensure class is updated)
 router.put('/:id', async (req, res) => {
   try {
-    const {
-      name,
-      math,
-      english,
-      science,
-      mean,
-      rubric,
-      examType,
-      class: studentClass // get class from request body
-    } = req.body;
-
+    const updateData = { ...req.body };
+    
     const result = await Result.findByIdAndUpdate(
       req.params.id,
-      {
-        name,
-        math,
-        english,
-        science,
-        mean,
-        rubric,
-        examType,
-        class: studentClass // update class
-      },
+      updateData,
       { new: true }
     );
 

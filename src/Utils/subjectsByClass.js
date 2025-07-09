@@ -1,17 +1,18 @@
+
 // Define subjects for each class
 const subjectsByClass = {
-  'Playgroup': ['language', 'reading', 'environment'],
-  'PP1': ['language', 'reading', 'environment'],
-  'PP2': ['language', 'reading', 'environment'],
-  'Grade 1': ['maths', 'english', 'kiswahili', 'integrated', 'creative'],
-  'Grade 2': ['maths', 'english', 'kiswahili', 'integrated', 'creative'],
-  'Grade 3': ['maths', 'english', 'kiswahili', 'integrated', 'creative'],
-  'Grade 4': ['maths', 'english', 'kiswahili', 'cre_environmental', 'kusoma', 'ss_crts_cre'],
-  'Grade 5': ['maths', 'english', 'kiswahili', 'cre_environmental', 'kusoma', 'ss_crts_cre'],
-  'Grade 6': ['maths', 'english', 'kiswahili', 'cre_environmental', 'kusoma', 'ss_crts_cre'],
-  'Grade 7': ['maths', 'english', 'kiswahili', 'ss', 'pretech', 'crts', 'agri_n', 'cre'],
-  'Grade 8': ['maths', 'english', 'kiswahili', 'ss', 'pretech', 'crts', 'agri_n', 'cre'],
-  'Grade 9': ['maths', 'english', 'kiswahili', 'ss', 'pretech', 'crts', 'agri_n', 'cre']
+  'Playgroup': ['maths', 'language', 'reading', 'environmental', 'integrated'],
+  'PP1': ['maths', 'language', 'reading', 'creative', 'cre', 'environmental'],
+  'PP2': ['maths', 'language', 'reading', 'kiswahili', 'kusoma'],
+  'Grade 1': ['maths', 'english', 'kiswahili', 'integrated'],
+  'Grade 2': ['maths', 'english', 'kiswahili', 'integrated'],
+  'Grade 3': ['maths', 'english', 'kiswahili', 'integrated'],
+  'Grade 4': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative', 'cre'],
+  'Grade 5': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative', 'cre'],
+  'Grade 6': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative', 'cre'],
+  'Grade 7': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'pretech', 'creative', 'agriculture', 'cre'],
+  'Grade 8': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'pretech', 'creative', 'agriculture', 'cre'],
+  'Grade 9': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'pretech', 'creative', 'agriculture', 'cre']
 };
 
 // Get all possible subjects across all classes for debugging
@@ -36,17 +37,14 @@ export const getSubjectDisplayName = (subject) => {
     kiswahili: 'Kiswahili',
     language: 'Language',
     reading: 'Reading',
-    environment: 'Environment',
+    environmental: 'Environmental',
     integrated: 'Integrated',
     creative: 'Creative',
-    cre_environmental: 'CRE&Environmental',
+    cre: 'CRE',
     kusoma: 'Kusoma',
-    ss_crts_cre: 'S/S &CRT/S &CRE',
-    ss: 'S/S',
+    social: 'Social',
     pretech: 'Pretech',
-    crts: 'Crt/S',
-    agri_n: 'Agri/N',
-    cre: 'CRE'
+    agriculture: 'Agriculture'
   };
   return displayNames[subject] || subject;
 };

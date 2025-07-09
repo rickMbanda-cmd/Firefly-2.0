@@ -1,52 +1,98 @@
-
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { getSubjectsByClass, getSubjectDisplayName } from '../Utils/subjectsByClass';
 
-const ClassMarklist = ({ students, selectedClass }) => {
-  // Sort students by mean score and add position
-  const rankedStudents = useMemo(() => {
-    const studentsWithMean = students.filter(s => typeof s.mean === 'number' && !isNaN(s.mean));
-    const studentsWithoutMean = students.filter(s => !(typeof s.mean === 'number' && !isNaN(s.mean)));
+// Add print styles for ClassMarklist
+const printStyles = `
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact;
+      margin: 0;
+      padding: 0;
+    }
     
-    // Sort by mean score in descending order
-    studentsWithMean.sort((a, b) => b.mean - a.mean);
+    .no-print, button, nav, .exam-nav {
+      display: none !important;
+    }
     
-    // Add position to students with valid means
-    studentsWithMean.forEach((student, index) => {
-      student.position = index + 1;
-    });
+    .print-container {
+      margin: 0 !important;
+      padding: 10px !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      max-width: none !important;
+      width: 100% !important;
+    }
     
-    // Students without valid means get no position
-    studentsWithoutMean.forEach(student => {
-      student.position = '-';
-    });
+    table {
+      page-break-inside: auto;
+      border-collapse: collapse !important;
+      width: 100% !important;
+      font-size: 10px !important;
+    }
     
-    return [...studentsWithMean, ...studentsWithoutMean];
-  }, [students]);
+    thead {
+      display: table-header-group;
+    }
+    
+    tr {
+      page-break-inside: avoid;
+    }
+    
+    th, td {
+      padding: 6px 4px !important;
+      font-size: 10px !important;
+      border: 1px solid #000 !important;
+    }
+    
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    
+    .table-wrapper {
+      overflow: visible !important;
+      max-height: none !important;
+    }
+  }
   
-  // Ensure all means are numbers and not null/undefined
-  const validMeans = useMemo(
-    () => rankedStudents.map(s => typeof s.mean === 'number' ? s.mean : null).filter(mean => mean !== null),
-    [rankedStudents]
-  );
-  
-  const classAverage = useMemo(
-    () => validMeans.length ? validMeans.reduce((a, b) => a + b, 0) / validMeans.length : 0,
-    [validMeans]
-  );
-  
-  const letterhead = useMemo(() => {
-    return {
-      logoUrl: 'Letterhead.png'
-    };
-  }, []);
+  @page {
+    margin: 0.3in;
+    size: A4 landscape;
+  }
+`;
 
-  // Get class name from selectedClass prop or first student
-  const className = selectedClass || (students.length > 0 && students[0].class ? students[0].class : '');
-  
-  // Get subjects for the current class
-  const subjects = getSubjectsByClass(className);
+// Inject print styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.type = 'text/css';
+  styleSheet.innerText = printStyles;
+  if (!document.head.querySelector('[data-print-styles-marklist]')) {
+    styleSheet.setAttribute('data-print-styles-marklist', 'true');
+    document.head.appendChild(styleSheet);
+  }
+}
+
+const ClassMarklist = ({ students, selectedClass }) => {
+  // Get subjects based on the selected class or first student's class
+  const currentClass = selectedClass || (students.length > 0 ? students[0].class : 'Grade 1');
+  const subjects = getSubjectsByClass(currentClass);
+
+  // Sort students by mean score (descending)
+  const sortedStudents = useMemo(() => {
+    return [...students].sort((a, b) => {
+      const meanA = typeof a.mean === 'number' ? a.mean : 0;
+      const meanB = typeof b.mean === 'number' ? b.mean : 0;
+      return meanB - meanA;
+    });
+  }, [students]);
+
+  const currentDate = new Date().toLocaleDateString();
+  const examType = students.length > 0 ? students[0].examType : '';
+  const displayExamType = examType === 'opener' ? 'Opener' : 
+                         examType === 'midterm' ? 'Midterm' : 
+                         examType === 'endterm' ? 'Endterm' : examType;
 
   const styles = {
     container: {
@@ -58,11 +104,29 @@ const ClassMarklist = ({ students, selectedClass }) => {
       borderRadius: '12px',
       boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
     },
-    letterhead: {
+    letterheadContainer: {
       textAlign: 'center',
-      marginBottom: '30px',
-      borderBottom: '3px solid #4a90e2',
-      paddingBottom: '20px'
+      marginBottom: '20px'
+    },
+    letterheadImage: {
+      width: '100%',
+      maxWidth: '600px',
+      height: 'auto'
+    },
+    titleSection: {
+      textAlign: 'center',
+      marginBottom: '20px'
+    },
+    reportTitle: {
+      color: '#2c3e50',
+      fontSize: '28px',
+      fontWeight: 'bold',
+      marginBottom: '8px'
+    },
+    subtitle: {
+      color: '#777',
+      fontSize: '16px',
+      marginBottom: '5px'
     },
     title: {
       color: '#2c3e50',
@@ -139,90 +203,67 @@ const ClassMarklist = ({ students, selectedClass }) => {
       maxHeight: '600px',
       border: '1px solid #e9ecef',
       borderRadius: '8px'
-    }
+    },
+      
   };
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.letterhead}>
+    return (
+    <div style={styles.container} className="print-container">
+      {/* Letterhead Header */}
+      <div style={styles.letterheadContainer}>
         <img 
-          src={letterhead.logoUrl} 
+          src="Letterhead.png" 
           alt="School Letterhead" 
-          style={{ width: '100%', maxWidth: '600px', height: 'auto' }} 
+          style={styles.letterheadImage}
         />
       </div>
-      
-      <h2 style={styles.title}>
-        Class Marklist{className && ` - ${className}`}
-      </h2>
-      
-      <div style={styles.tableWrapper}>
+
+      {/* Report Title Section */}
+      <div style={styles.titleSection}>
+        <h2 style={styles.reportTitle}>CLASS MARKLIST</h2>
+        {selectedClass && <p style={styles.subtitle}>{selectedClass}</p>}
+        {displayExamType && <p style={styles.subtitle}>{displayExamType} - {currentDate}</p>}
+      </div>
+
+      {/* Table */}
+      <div className="table-wrapper" style={styles.tableWrapper}>
         <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.tableHeader}>Position</th>
-              <th style={{...styles.tableHeader, ...styles.nameCell}}>Student Name</th>
-              {subjects.map(subject => (
-                <th key={subject} style={styles.tableHeader}>
-                  {getSubjectDisplayName(subject)}
-                </th>
-              ))}
-              <th style={styles.tableHeader}>Mean</th>
-              <th style={styles.tableHeader}>Rubric</th>
-              <th style={styles.tableHeader}>Class</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rankedStudents.map((student, index) => (
-              <tr 
-                key={student.id || student._id || index}
-                style={{
-                  ...(index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd),
-                  ...styles.tableRowHover
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e3f2fd';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#f8f9fa' : '#fff';
-                }}
-              >
-                <td style={{...styles.tableCell, fontWeight: 'bold', color: '#e74c3c'}}>
-                  {student.position}
-                </td>
-                <td style={{...styles.tableCell, ...styles.nameCell}} title={student.name || 'N/A'}>
-                  {student.name || 'N/A'}
-                </td>
-                {subjects.map(subject => (
-                  <td key={subject} style={styles.tableCell}>
-                    {typeof student[subject] === 'number' && !isNaN(student[subject]) 
-                      ? student[subject].toFixed(1) 
-                      : '-'}
-                  </td>
-                ))}
-                <td style={{...styles.tableCell, fontWeight: 'bold', color: '#2980b9'}}>
-                  {typeof student.mean === 'number' && !isNaN(student.mean)
-                    ? student.mean.toFixed(2)
-                    : '-'}
-                </td>
-                <td style={{...styles.tableCell, fontWeight: 'bold', color: '#27ae60'}}>
-                  {student.rubric || '-'}
-                </td>
-                <td style={styles.tableCell}>
-                  {student.class || '-'}
-                </td>
-              </tr>
+        <thead>
+          <tr>
+            <th style={styles.tableHeader}>Position</th>
+            <th style={styles.tableHeader}>Name</th>
+            {subjects.map(subject => (
+              <th key={subject} style={styles.tableHeader}>
+                {getSubjectDisplayName(subject)}
+              </th>
             ))}
-          </tbody>
+            <th style={styles.tableHeader}>Mean</th>
+            <th style={styles.tableHeader}>Rubric</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedStudents.map((student, index) => (
+            <tr key={student.id || student._id || index}>
+              <td style={styles.tableCell}>{student.position || index + 1}</td>
+              <td style={styles.tableCell}>{student.name || '-'}</td>
+              {subjects.map(subject => (
+                <td key={subject} style={styles.tableCell}>
+                  {student[subject] || '-'}
+                </td>
+              ))}
+              <td style={styles.tableCell}>
+                {typeof student.mean === 'number' ? student.mean.toFixed(1) : '-'}
+              </td>
+              <td style={styles.tableCell}>{student.rubric || '-'}</td>
+            </tr>
+          ))}
+        </tbody>
         </table>
       </div>
-      
+
       <div style={styles.summarySection}>
         <div style={styles.summaryText}>
-          Class Average: {validMeans.length ? classAverage.toFixed(2) : '-'}
-        </div>
-        <div style={{ marginTop: '10px', fontSize: '14px', color: '#34495e' }}>
-          Total Students: {rankedStudents.length} | Students with Scores: {validMeans.length}
+          Total Students: {sortedStudents.length}
         </div>
       </div>
     </div>
@@ -242,5 +283,7 @@ ClassMarklist.propTypes = {
   ).isRequired,
   selectedClass: PropTypes.string,
 };
+
+
 
 export default ClassMarklist;

@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
@@ -13,6 +12,65 @@ import {
   Filler,
 } from 'chart.js';
 import { getSubjectsByClass, getSubjectDisplayName, getRubric } from '../Utils/subjectsByClass';
+
+// Add print styles
+const printStyles = `
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .no-print, button, nav, .exam-nav {
+      display: none !important;
+    }
+    
+    .print-container {
+      margin: 0 !important;
+      padding: 10px !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      max-width: none !important;
+      width: 100% !important;
+    }
+    
+    table {
+      page-break-inside: avoid;
+      border-collapse: collapse !important;
+    }
+    
+    tr {
+      page-break-inside: avoid;
+    }
+    
+    .page-break {
+      page-break-before: always;
+    }
+    
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+  }
+  
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+`;
+
+// Inject print styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.type = 'text/css';
+  styleSheet.innerText = printStyles;
+  if (!document.head.querySelector('[data-print-styles]')) {
+    styleSheet.setAttribute('data-print-styles', 'true');
+    document.head.appendChild(styleSheet);
+  }
+}
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend, Filler);
 
@@ -43,169 +101,130 @@ const getOverallRemark = (rubric) => {
 };
 
 const IndividualReport = ({ student, classData }) => {
-  const { name, mean, rubric, class: studentClass, ...subjectMarks } = student;
   const letterhead = useLetterhead();
 
-  const classAverage = useMemo(() => {
-    const validMeans = classData.map(s => s.mean).filter(mean => mean !== null);
-    return validMeans.length ? validMeans.reduce((a, b) => a + b, 0) / validMeans.length : 0;
+  // Get subjects from the student's class
+  const subjects = getSubjectsByClass(student.class);
+
+  // Extract subject marks
+  const subjectMarks = {};
+  subjects.forEach(subject => {
+    subjectMarks[subject] = student[subject];
+  });
+
+  // Calculate class statistics
+  const classStats = useMemo(() => {
+    if (!classData || classData.length === 0) return null;
+
+    const validMeans = classData
+      .map(s => s.mean)
+      .filter(mean => typeof mean === 'number' && !isNaN(mean));
+
+    if (validMeans.length === 0) return null;
+
+    const sum = validMeans.reduce((a, b) => a + b, 0);
+    const average = sum / validMeans.length;
+    const highest = Math.max(...validMeans);
+    const lowest = Math.min(...validMeans);
+
+    return { average, highest, lowest };
   }, [classData]);
 
-  const subjects = getSubjectsByClass(studentClass);
+  // Get student's position in class
+  const studentPosition = useMemo(() => {
+    if (!classData || classData.length === 0) return null;
 
-  const data = {
-    labels: ['Student Performance', 'Class Average'],
-    datasets: [
-      {
-        label: `${name}'s Performance`,
-        data: [mean || 0, classAverage],
-        borderColor: 'rgba(54, 162, 235, 1)',
-        backgroundColor: 'rgba(54, 162, 235, 0.1)',
-        borderWidth: 3,
-        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 8,
-        pointHoverRadius: 10,
-        fill: true,
-        tension: 0.4,
-      },
-      {
-        label: 'Class Average',
-        data: [classAverage, classAverage],
-        borderColor: 'rgba(255, 99, 132, 1)',
-        backgroundColor: 'rgba(255, 99, 132, 0.1)',
-        borderWidth: 3,
-        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 8,
-        pointHoverRadius: 10,
-        fill: false,
-        tension: 0.4,
-        borderDash: [10, 5],
-      },
-    ],
-  };
+    const sorted = [...classData]
+      .filter(s => typeof s.mean === 'number' && !isNaN(s.mean))
+      .sort((a, b) => b.mean - a.mean);
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { 
-        position: 'top',
-        labels: {
-          usePointStyle: true,
-          padding: 20,
-          font: { size: 12, weight: 'bold' }
-        }
-      },
-      title: {
-        display: true,
-        text: 'Performance Comparison',
-        font: { size: 18, weight: 'bold' },
-        color: '#2c3e50',
-        padding: 20
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#4a90e2',
-        borderWidth: 1,
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        grid: {
-          color: 'rgba(0,0,0,0.1)',
-          lineWidth: 1
-        },
-        ticks: {
-          color: '#2c3e50',
-          font: { size: 12 }
-        }
-      },
-      x: {
-        grid: {
-          color: 'rgba(0,0,0,0.1)',
-          lineWidth: 1
-        },
-        ticks: {
-          color: '#2c3e50',
-          font: { size: 12 }
-        }
-      }
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index'
-    }
-  };
+    const position = sorted.findIndex(s => s._id === student._id || s.id === student.id);
+    return position >= 0 ? position + 1 : null;
+  }, [classData, student]);
+
+  const currentDate = new Date().toLocaleDateString();
+  const examType = student.examType;
+  const displayExamType = examType === 'opener' ? 'Opener' : 
+                         examType === 'midterm' ? 'Midterm' : 
+                         examType === 'endterm' ? 'Endterm' : examType;
+
+  const overallRubric = student.rubric || getRubric(student.mean);
+  const overallRemark = getOverallRemark(overallRubric);
 
   const styles = {
     container: {
       fontFamily: 'Arial, sans-serif',
-      maxWidth: '900px',
+      maxWidth: '800px',
       margin: '0 auto',
-      padding: '30px',
-      backgroundColor: '#fff',
-      borderRadius: '12px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-      lineHeight: '1.6'
-    },
-    letterhead: {
-      textAlign: 'center',
-      marginBottom: '30px',
-      borderBottom: '3px solid #4a90e2',
-      paddingBottom: '20px'
-    },
-    title: {
-      color: '#2c3e50',
-      fontSize: '24px',
-      fontWeight: 'bold',
-      marginBottom: '20px',
-      textAlign: 'center',
-      borderBottom: '2px solid #ecf0f1',
-      paddingBottom: '15px'
-    },
-    infoSection: {
-      backgroundColor: '#f8f9fa',
       padding: '20px',
+      backgroundColor: '#fff',
       borderRadius: '8px',
-      marginBottom: '25px',
-      border: '1px solid #e9ecef'
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      '@media print': {
+        boxShadow: 'none',
+        margin: '0',
+        padding: '10px',
+        maxWidth: 'none'
+      }
     },
-    infoItem: {
-      margin: '8px 0',
-      fontSize: '16px',
-      color: '#2c3e50'
+    letterheadContainer: {
+      textAlign: 'center',
+      marginBottom: '20px'
+    },
+    letterheadImage: {
+      width: '100%',
+      maxWidth: '600px',
+      height: 'auto'
+    },
+    titleSection: {
+      textAlign: 'center',
+      marginBottom: '20px'
+    },
+    reportTitle: {
+      color: '#2c3e50',
+      fontSize: '28px',
+      fontWeight: 'bold',
+      marginBottom: '8px'
+    },
+    subtitle: {
+      color: '#777',
+      fontSize: '16px'
+    },
+    studentInfo: {
+      marginBottom: '25px',
+      padding: '15px',
+      backgroundColor: '#f8f9fa',
+      borderRadius: '6px'
+    },
+    infoRow: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: '8px'
+    },
+    label: {
+      fontWeight: 'bold',
+      color: '#495057'
+    },
+    value: {
+      color: '#6c757d'
     },
     table: {
       width: '100%',
       borderCollapse: 'collapse',
-      marginBottom: '25px',
-      backgroundColor: '#fff',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.08)'
+      marginBottom: '20px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
     },
     tableHeader: {
-      backgroundColor: '#4a90e2',
+      backgroundColor: '#3498db',
       color: '#fff',
       fontWeight: 'bold',
-      padding: '15px 12px',
+      padding: '12px',
       textAlign: 'left',
-      fontSize: '14px',
-      borderBottom: '2px solid #357abd'
+      borderBottom: '2px solid #2980b9'
     },
     tableCell: {
       padding: '12px',
-      borderBottom: '1px solid #e9ecef',
-      fontSize: '14px',
-      color: '#2c3e50'
+      borderBottom: '1px solid #ecf0f1'
     },
     tableRowEven: {
       backgroundColor: '#f8f9fa'
@@ -213,64 +232,107 @@ const IndividualReport = ({ student, classData }) => {
     tableRowOdd: {
       backgroundColor: '#fff'
     },
-    overallSection: {
-      backgroundColor: '#e8f4fd',
-      padding: '20px',
-      borderRadius: '8px',
-      border: '2px solid #4a90e2',
-      marginBottom: '25px'
+    statsSection: {
+      marginBottom: '25px',
+      padding: '15px',
+      backgroundColor: '#f8f9fa',
+      borderRadius: '6px'
     },
-    overallText: {
-      fontSize: '16px',
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+      gap: '15px'
+    },
+    statItem: {
+      display: 'flex',
+      justifyContent: 'space-between'
+    },
+    statLabel: {
       fontWeight: 'bold',
-      color: '#2c3e50',
-      marginBottom: '10px'
+      color: '#495057'
     },
-    remarkText: {
-      fontSize: '14px',
-      color: '#34495e',
-      fontStyle: 'italic',
-      lineHeight: '1.5'
+    statValue: {
+      color: '#6c757d'
     },
-    chartContainer: {
-      backgroundColor: '#fff',
-      padding: '20px',
-      borderRadius: '8px',
-      border: '1px solid #e9ecef',
-      marginTop: '20px'
+    remarksSection: {
+      padding: '15px',
+      backgroundColor: '#fff3cd',
+      borderRadius: '6px',
+      border: '1px solid #ffeaa7'
+    },
+    overallRemark: {
+      fontSize: '16px',
+      lineHeight: '1.5',
+      color: '#495057'
+    },
+    signatureSection: {
+      display: 'flex',
+      justifyContent: 'space-around',
+      marginTop: '30px'
+    },
+    signature: {
+      textAlign: 'center'
+    },
+    signatureLine: {
+      borderBottom: '1px solid #000',
+      marginBottom: '5px',
+      width: '150px',
+      margin: '0 auto'
+    },
+    signatureLabel: {
+      color: '#777',
+      fontSize: '14px'
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.letterhead}>
+    <div style={styles.container} className="print-container">
+      {/* Letterhead Header */}
+      <div style={styles.letterheadContainer}>
         <img 
-          src={letterhead.logoUrl} 
+          src="Letterhead.png" 
           alt="School Letterhead" 
-          style={{ width: '100%', maxWidth: '600px', height: 'auto' }} 
+          style={styles.letterheadImage}
         />
       </div>
-      
-      <h2 style={styles.title}>
-        Individual Academic Report
-      </h2>
 
-      <div style={styles.infoSection}>
-        <div style={styles.infoItem}>
-          <strong>Student Name:</strong> {name}
+      {/* Report Title */}
+      <div style={styles.titleSection}>
+        <h2 style={styles.reportTitle}>INDIVIDUAL ACADEMIC REPORT</h2>
+        <p style={styles.subtitle}>
+          {displayExamType} Examination - {currentDate}
+        </p>
+      </div>
+
+      {/* Student Information */}
+      <div style={styles.studentInfo}>
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Student Name:</span>
+          <span style={styles.value}>{student.name}</span>
         </div>
-        {studentClass && (
-          <div style={styles.infoItem}>
-            <strong>Class:</strong> {studentClass}
-          </div>
-        )}
-        <div style={styles.infoItem}>
-          <strong>Class Position:</strong> {student.position || 'N/A'}
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Class:</span>
+          <span style={styles.value}>{student.class}</span>
+        </div>
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Position:</span>
+          <span style={styles.value}>{studentPosition || '-'}</span>
+        </div>
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Overall Mean:</span>
+          <span style={styles.value}>
+            {typeof student.mean === 'number' ? student.mean.toFixed(1) : '-'}
+          </span>
+        </div>
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Overall Rubric:</span>
+          <span style={styles.value}>{overallRubric}</span>
         </div>
       </div>
 
+      {/* Subject Performance Table */}
       <h3 style={{ color: '#2c3e50', marginBottom: '15px', fontSize: '18px' }}>Subject Performance</h3>
-      
+
       <table style={styles.table}>
         <thead>
           <tr>
@@ -285,7 +347,7 @@ const IndividualReport = ({ student, classData }) => {
             const score = subjectMarks[subject];
             const subjectRubric = typeof score === 'number' ? getRubric(score) : '-';
             const remark = typeof score === 'number' ? getSubjectRemark(subjectRubric) : '-';
-            
+
             return (
               <tr 
                 key={subject} 
@@ -305,17 +367,47 @@ const IndividualReport = ({ student, classData }) => {
         </tbody>
       </table>
 
-      <div style={styles.overallSection}>
-        <div style={styles.overallText}>
-          Overall Performance: {mean != null ? mean.toFixed(2) : 'N/A'} | Rubric: {rubric || 'N/A'}
+      {/* Class Statistics */}
+      {classStats && (
+        <div style={styles.statsSection}>
+          <h3 style={{ color: '#2c3e50', marginBottom: '15px', fontSize: '18px' }}>Class Statistics</h3>
+          <div style={styles.statsGrid}>
+            <div style={styles.statItem}>
+              <span style={styles.statLabel}>Class Average:</span>
+              <span style={styles.statValue}>{classStats.average.toFixed(1)}</span>
+            </div>
+            <div style={styles.statItem}>
+              <span style={styles.statLabel}>Highest Score:</span>
+              <span style={styles.statValue}>{classStats.highest.toFixed(1)}</span>
+            </div>
+            <div style={styles.statItem}>
+              <span style={styles.statLabel}>Lowest Score:</span>
+              <span style={styles.statValue}>{classStats.lowest.toFixed(1)}</span>
+            </div>
+            <div style={styles.statItem}>
+              <span style={styles.statLabel}>Total Students:</span>
+              <span style={styles.statValue}>{classData.length}</span>
+            </div>
+          </div>
         </div>
-        <div style={styles.remarkText}>
-          {rubric ? getOverallRemark(rubric) : 'Performance data not available.'}
-        </div>
+      )}
+
+      {/* Overall Remarks */}
+      <div style={styles.remarksSection}>
+        <h3 style={{ color: '#2c3e50', marginBottom: '15px', fontSize: '18px' }}>Overall Remarks</h3>
+        <p style={styles.overallRemark}>{overallRemark}</p>
       </div>
 
-      <div style={{...styles.chartContainer, height: '400px'}}>
-        <Line data={data} options={chartOptions} />
+      {/* Signature Section */}
+      <div style={styles.signatureSection}>
+        <div style={styles.signature}>
+          <p style={styles.signatureLine}>_______________________</p>
+          <p style={styles.signatureLabel}>Class Teacher</p>
+        </div>
+        <div style={styles.signature}>
+          <p style={styles.signatureLine}>_______________________</p>
+          <p style={styles.signatureLabel}>Head Teacher</p>
+        </div>
       </div>
     </div>
   );
