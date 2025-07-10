@@ -101,51 +101,164 @@ const Reports = () => {
   }, [allStudents]);
 
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [studentSearchTerm, setStudentSearchTerm] = useState("");
+  const [printOrientation, setPrintOrientation] = useState("portrait");
 
   const individualRef = useRef();
   const classRef = useRef();
 
-  // Memoize print handlers for performance and to avoid unnecessary re-renders
-  const handlePrintIndividual = useReactToPrint({
-    content: useCallback(() => individualRef.current, [individualRef]),
-    documentTitle: 'Individual Report',
-    removeAfterPrint: true,
-    pageStyle: `
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact;
-        }
-        .exam-module-container {
-          box-shadow: none !important;
-          background: #fff !important;
-        }
-        button, nav, .exam-nav, .no-print { display: none !important; }
-      }
-    `
-  });
-
-  const handlePrintClass = useReactToPrint({
-    content: useCallback(() => classRef.current, [classRef]),
-    documentTitle: 'Class Marklist',
-    removeAfterPrint: true,
-    pageStyle: `
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact;
-        }
-        .exam-module-container {
-          box-shadow: none !important;
-          background: #fff !important;
-        }
-        button, nav, .exam-nav, .no-print { display: none !important; }
-      }
-    `
-  });
+  // Filter students based on search term
+  const searchFilteredStudents = useMemo(() => {
+    if (!studentSearchTerm.trim()) return filteredStudents;
+    return filteredStudents.filter(student => 
+      student.name?.toLowerCase().includes(studentSearchTerm.toLowerCase())
+    );
+  }, [filteredStudents, studentSearchTerm]);
 
   const selectedStudent = useMemo(() =>
     filteredStudents.find(s => (s.id || s._id) === selectedStudentId),
     [filteredStudents, selectedStudentId]
   );
+
+  // Memoize print handlers for performance and to avoid unnecessary re-renders
+  const handlePrintIndividual = useReactToPrint({
+    contentRef: individualRef,
+    documentTitle: `Individual_Report_${selectedStudent?.name || 'Student'}`,
+    removeAfterPrint: true,
+    onBeforeGetContent: () => {
+      return new Promise((resolve) => {
+        // Remove any existing print styles
+        const existingStyles = document.querySelectorAll('[data-print-styles]');
+        existingStyles.forEach(style => style.remove());
+        
+        // Add new print styles with current orientation
+        const printStyles = `
+          @media print {
+            body {
+              -webkit-print-color-adjust: exact;
+              color-adjust: exact;
+              margin: 0;
+              padding: 0;
+            }
+            .exam-module-container {
+              box-shadow: none !important;
+              background: #fff !important;
+            }
+            button, nav, .exam-nav, .no-print { display: none !important; }
+            .print-container {
+              margin: 0 !important;
+              padding: 10px !important;
+              box-shadow: none !important;
+              border-radius: 0 !important;
+              max-width: none !important;
+              width: 100% !important;
+            }
+            table {
+              page-break-inside: avoid;
+              border-collapse: collapse !important;
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+            .page-break {
+              page-break-before: always;
+            }
+            img {
+              max-width: 100% !important;
+              height: auto !important;
+            }
+          }
+          @page {
+            margin: 0.5in;
+            size: A4 ${printOrientation};
+          }
+        `;
+        
+        const styleSheet = document.createElement('style');
+        styleSheet.type = 'text/css';
+        styleSheet.innerText = printStyles;
+        styleSheet.setAttribute('data-print-styles', 'true');
+        document.head.appendChild(styleSheet);
+        
+        setTimeout(resolve, 100);
+      });
+    }
+  });
+
+  const handlePrintClass = useReactToPrint({
+    contentRef: classRef,
+    documentTitle: `Class_Marklist_${marklistClass !== 'All Classes' ? marklistClass : 'All'}`,
+    removeAfterPrint: true,
+    onBeforeGetContent: () => {
+      return new Promise((resolve) => {
+        // Remove any existing print styles
+        const existingStyles = document.querySelectorAll('[data-print-styles-marklist]');
+        existingStyles.forEach(style => style.remove());
+        
+        // Add new print styles with current orientation
+        const printStyles = `
+          @media print {
+            body {
+              -webkit-print-color-adjust: exact;
+              color-adjust: exact;
+              margin: 0;
+              padding: 0;
+            }
+            .exam-module-container {
+              box-shadow: none !important;
+              background: #fff !important;
+            }
+            button, nav, .exam-nav, .no-print { display: none !important; }
+            .print-container {
+              margin: 0 !important;
+              padding: 10px !important;
+              box-shadow: none !important;
+              border-radius: 0 !important;
+              max-width: none !important;
+              width: 100% !important;
+            }
+            table {
+              page-break-inside: auto;
+              border-collapse: collapse !important;
+              width: 100% !important;
+              font-size: ${printOrientation === 'landscape' ? '10px' : '9px'} !important;
+            }
+            thead {
+              display: table-header-group;
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+            th, td {
+              padding: ${printOrientation === 'landscape' ? '6px 4px' : '4px 2px'} !important;
+              font-size: ${printOrientation === 'landscape' ? '10px' : '9px'} !important;
+              border: 1px solid #000 !important;
+            }
+            img {
+              max-width: 100% !important;
+              height: auto !important;
+            }
+            .table-wrapper {
+              overflow: visible !important;
+              max-height: none !important;
+            }
+          }
+          @page {
+            margin: 0.3in;
+            size: A4 ${printOrientation};
+          }
+        `;
+        
+        const styleSheet = document.createElement('style');
+        styleSheet.type = 'text/css';
+        styleSheet.innerText = printStyles;
+        styleSheet.setAttribute('data-print-styles-marklist', 'true');
+        document.head.appendChild(styleSheet);
+        
+        setTimeout(resolve, 100);
+      });
+    }
+  });
 
   const styles = {
     container: { padding: '2em', fontFamily: 'sans-serif' },
@@ -311,35 +424,113 @@ const Reports = () => {
           </div>
         </div>
 
-        <label htmlFor="studentSelect" style={{ marginRight: '0.5em' }}>
-          Select Student:
-        </label>
-        <select
-          id="studentSelect"
-          value={selectedStudentId}
-          onChange={(e) => setSelectedStudentId(e.target.value)}
-          style={{ padding: '0.5em', borderRadius: '4px', border: '1px solid #ccc' }}
-        >
-          <option value="">Select a student...</option>
-          {filteredStudents.filter(Boolean).map(student => (
-            <option key={student.id || student._id} value={student.id || student._id}>
-              {student.name || `Student ${student.id || student._id}`} 
-              {student.class && ` (${student.class})`}
-              {student.examType && ` - ${student.examType}`}
-            </option>
-          ))}
-        </select>
+        <div style={{ display: 'flex', gap: '1em', alignItems: 'center', marginBottom: '1em', flexWrap: 'wrap' }}>
+          <div>
+            <label htmlFor="studentSelect" style={{ marginRight: '0.5em' }}>
+              Select Student:
+            </label>
+            <select
+              id="studentSelect"
+              value={selectedStudentId}
+              onChange={(e) => setSelectedStudentId(e.target.value)}
+              style={{ padding: '0.5em', borderRadius: '4px', border: '1px solid #ccc', minWidth: '200px' }}
+            >
+              <option value="">Select a student...</option>
+              {searchFilteredStudents.filter(Boolean).map(student => (
+                <option key={student.id || student._id} value={student.id || student._id}>
+                  {student.name || `Student ${student.id || student._id}`} 
+                  {student.class && ` (${student.class})`}
+                  {student.examType && ` - ${student.examType}`}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
+            <label htmlFor="studentSearch" style={{ marginRight: '0.5em' }}>
+              Search Students:
+            </label>
+            <input
+              id="studentSearch"
+              type="text"
+              value={studentSearchTerm}
+              onChange={(e) => setStudentSearchTerm(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && searchFilteredStudents.length > 0) {
+                  setSelectedStudentId(searchFilteredStudents[0].id || searchFilteredStudents[0]._id);
+                }
+              }}
+              placeholder="Search by name..."
+              style={{ 
+                padding: '0.5em', 
+                borderRadius: '4px', 
+                border: '1px solid #ccc',
+                minWidth: '200px'
+              }}
+            />
+            <button
+              onClick={() => {
+                if (searchFilteredStudents.length > 0) {
+                  setSelectedStudentId(searchFilteredStudents[0].id || searchFilteredStudents[0]._id);
+                }
+              }}
+              disabled={searchFilteredStudents.length === 0}
+              style={{
+                padding: '0.5em 1em',
+                borderRadius: '4px',
+                border: '1px solid #4f8cff',
+                backgroundColor: searchFilteredStudents.length > 0 ? '#4f8cff' : '#ccc',
+                color: '#fff',
+                cursor: searchFilteredStudents.length > 0 ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3em'
+              }}
+            >
+              🔍 Search
+            </button>
+          </div>
+        </div>
         {selectedStudent && (
           <div ref={individualRef} style={styles.report}>
             <IndividualReport student={selectedStudent} classData={filteredStudents} />
           </div>
         )}
+        {/* Print Options */}
+        <div className="no-print" style={{ margin: '1em 0', padding: '1em', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+          <label style={{ fontWeight: 'bold', marginRight: '1em' }}>Print Orientation:</label>
+          <label style={{ marginRight: '1em' }}>
+            <input
+              type="radio"
+              value="portrait"
+              checked={printOrientation === 'portrait'}
+              onChange={(e) => setPrintOrientation(e.target.value)}
+              style={{ marginRight: '0.5em' }}
+            />
+            Portrait
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="landscape"
+              checked={printOrientation === 'landscape'}
+              onChange={(e) => setPrintOrientation(e.target.value)}
+              style={{ marginRight: '0.5em' }}
+            />
+            Landscape
+          </label>
+        </div>
+
         <button
           onClick={handlePrintIndividual}
-          style={styles.button}
+          style={{
+            ...styles.button,
+            opacity: !selectedStudent ? 0.6 : 1,
+            cursor: !selectedStudent ? 'not-allowed' : 'pointer'
+          }}
           disabled={!selectedStudent}
         >
-          Print Individual Report
+          Print Individual Report ({printOrientation})
         </button>
       </div>
 
@@ -382,7 +573,7 @@ const Reports = () => {
           style={styles.button}
           disabled={marklistStudents.length === 0}
         >
-          Print Class Marklist
+          Print Class Marklist ({printOrientation})
         </button>
       </div>
       </div>

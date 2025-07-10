@@ -3,76 +3,7 @@ import PropTypes from 'prop-types';
 import { getSubjectsByClass, getSubjectDisplayName } from '../Utils/subjectsByClass';
 
 // Add print styles for ClassMarklist
-const printStyles = `
-  @media print {
-    body {
-      -webkit-print-color-adjust: exact;
-      color-adjust: exact;
-      margin: 0;
-      padding: 0;
-    }
-    
-    .no-print, button, nav, .exam-nav {
-      display: none !important;
-    }
-    
-    .print-container {
-      margin: 0 !important;
-      padding: 10px !important;
-      box-shadow: none !important;
-      border-radius: 0 !important;
-      max-width: none !important;
-      width: 100% !important;
-    }
-    
-    table {
-      page-break-inside: auto;
-      border-collapse: collapse !important;
-      width: 100% !important;
-      font-size: 10px !important;
-    }
-    
-    thead {
-      display: table-header-group;
-    }
-    
-    tr {
-      page-break-inside: avoid;
-    }
-    
-    th, td {
-      padding: 6px 4px !important;
-      font-size: 10px !important;
-      border: 1px solid #000 !important;
-    }
-    
-    img {
-      max-width: 100% !important;
-      height: auto !important;
-    }
-    
-    .table-wrapper {
-      overflow: visible !important;
-      max-height: none !important;
-    }
-  }
-  
-  @page {
-    margin: 0.3in;
-    size: A4 landscape;
-  }
-`;
-
-// Inject print styles
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.type = 'text/css';
-  styleSheet.innerText = printStyles;
-  if (!document.head.querySelector('[data-print-styles-marklist]')) {
-    styleSheet.setAttribute('data-print-styles-marklist', 'true');
-    document.head.appendChild(styleSheet);
-  }
-}
+// Print styles will be injected dynamically from the parent component
 
 const ClassMarklist = ({ students, selectedClass }) => {
   // Get subjects based on the selected class or first student's class
@@ -97,7 +28,7 @@ const ClassMarklist = ({ students, selectedClass }) => {
     });
   }, [students, subjects]);
 
-  const currentDate = new Date().toLocaleDateString();
+  const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const examType = students.length > 0 ? students[0].examType : '';
   const displayExamType = examType === 'opener' ? 'Opener' : 
                          examType === 'midterm' ? 'Midterm' : 

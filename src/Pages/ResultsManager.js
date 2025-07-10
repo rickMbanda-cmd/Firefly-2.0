@@ -462,7 +462,7 @@ const ResultsManager = () => {
                   <th style={styles.th}>📊 Mean</th>
                   <th style={styles.th}>📋 Rubric</th>
                   <th style={styles.th}>🏫 Class</th>
-                  <th style={styles.th}>⚙️ Actions</th>
+                  <th style={{ ...styles.th, minWidth: '180px' }}>⚙️ Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -516,21 +516,39 @@ const ResultsManager = () => {
                       </span>
                     </td>
                     <td style={styles.td}>{r.class}</td>
-                    <td style={styles.td}>
-                      <button 
-                        onClick={() => handleEdit(r)} 
-                        style={{ ...styles.actionButton, ...styles.editButton }}
-                        title="Edit Result"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(r._id)} 
-                        style={{ ...styles.actionButton, ...styles.deleteButton }}
-                        title="Delete Result"
-                      >
-                        🗑️ Delete
-                      </button>
+                    <td style={{ ...styles.td, minWidth: '180px', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button 
+                          onClick={() => handleEdit(r)} 
+                          style={{ ...styles.actionButton, ...styles.editButton }}
+                          title="Edit Result"
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = 'scale(1.05)';
+                            e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
+                          }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(r._id)} 
+                          style={{ ...styles.actionButton, ...styles.deleteButton }}
+                          title="Delete Result - This action cannot be undone"
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = 'scale(1.05)';
+                            e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
+                          }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

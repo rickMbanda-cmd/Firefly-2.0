@@ -31,16 +31,8 @@ export const calculateRubric = (score) => {
     throw new TypeError('Score must be a number');
   }
 
-  const rubric = {
-    'Exceeds Expectations (E.E)': 80,
-    'Meets Expectations (M.E)': 65,
-    'Approaching Expectations (A.E)': 50,
-    'Below Expectations (B.E)': 0,
-  };
-
-  for (const [label, threshold] of Object.entries(rubric)) {
-    if (score >= threshold) return label;
-  }
-  
-  return 'Below Expectations (B.E)'; // Default case
+  if (score >= 80) return 'Exceeds Expectations (E.E)';
+  if (score >= 65) return 'Meets Expectations (M.E)';
+  if (score >= 50) return 'Approaching Expectations (A.E)';
+  return 'Below Expectations (B.E)';
 };

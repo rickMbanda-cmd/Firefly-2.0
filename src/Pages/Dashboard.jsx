@@ -13,11 +13,7 @@ const Dashboard = () => {
 
   const styles = {
     container: {
-      background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%)',
-      backgroundImage: 'url(/Kids.jpg)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundBlendMode: 'overlay',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       minHeight: '100vh',
       padding: '20px',
       fontFamily: '"Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
@@ -25,7 +21,11 @@ const Dashboard = () => {
     contentWrapper: {
       maxWidth: '1200px',
       margin: '0 auto',
-      background: 'rgba(255, 255, 255, 0.95)',
+      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
+      backgroundImage: 'url(/Kids.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundBlendMode: 'overlay',
       borderRadius: '24px',
       padding: '40px',
       boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2)',
