@@ -7,9 +7,9 @@ const subjectsByClass = {
   'Grade 1': ['maths', 'english', 'kiswahili', 'integrated'],
   'Grade 2': ['maths', 'english', 'kiswahili', 'integrated'],
   'Grade 3': ['maths', 'english', 'kiswahili', 'integrated'],
-  'Grade 4': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative', 'cre'],
-  'Grade 5': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative', 'cre'],
-  'Grade 6': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative', 'cre'],
+  'Grade 4': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative'],
+  'Grade 5': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative'],
+  'Grade 6': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'creative'],
   'Grade 7': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'pretech', 'creative', 'agriculture', 'cre'],
   'Grade 8': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'pretech', 'creative', 'agriculture', 'cre'],
   'Grade 9': ['maths', 'english', 'kiswahili', 'integrated', 'social', 'pretech', 'creative', 'agriculture', 'cre']
@@ -49,10 +49,10 @@ export const getSubjectDisplayName = (subject) => {
   return displayNames[subject] || subject;
 };
 
-// Function to get rubric based on mean score (using acronyms)
+// Function to get rubric based on mean score (using full names)
 export const getRubric = (mean) => {
-  if (mean >= 80) return 'E.E'; // Exceeding Expectations
-  if (mean >= 65) return 'M.E'; // Meeting Expectations  
-  if (mean >= 50) return 'A.E'; // Approaching Expectations
-  return 'B.E'; // Below Expectations
+  if (mean >= 80) return 'Exceeds Expectations (E.E)';
+  if (mean >= 65) return 'Meets Expectations (M.E)';  
+  if (mean >= 50) return 'Approaching Expectations (A.E)';
+  return 'Below Expectations (B.E)';
 };

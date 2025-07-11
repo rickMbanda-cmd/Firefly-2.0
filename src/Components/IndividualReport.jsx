@@ -23,10 +23,25 @@ ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, T
 const getSubjectRemark = (rubric) => {
   const remarks = {
     'Exceeds Expectations (E.E)': 'Excellent',
-    'Meets Expectations (M.E)': 'Outstanding',
+    'Meets Expectations (M.E)': 'Outstanding', 
     'Approaching Expectations (A.E)': 'You can do better',
     'Below Expectations (B.E)': 'Needs improved study habits'
   };
+  
+  // Handle both full rubric names and abbreviated forms
+  if (rubric === 'E.E' || rubric === 'Exceeds Expectations (E.E)') {
+    return remarks['Exceeds Expectations (E.E)'];
+  }
+  if (rubric === 'M.E' || rubric === 'Meets Expectations (M.E)') {
+    return remarks['Meets Expectations (M.E)'];
+  }
+  if (rubric === 'A.E' || rubric === 'Approaching Expectations (A.E)') {
+    return remarks['Approaching Expectations (A.E)'];
+  }
+  if (rubric === 'B.E' || rubric === 'Below Expectations (B.E)') {
+    return remarks['Below Expectations (B.E)'];
+  }
+  
   return remarks[rubric] || remarks['Below Expectations (B.E)'];
 };
 
@@ -156,25 +171,10 @@ const IndividualReport = ({ student, classData }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: { 
-        position: 'top',
-        labels: {
-          font: {
-            size: 14,
-            weight: 'bold'
-          },
-          padding: 20,
-          usePointStyle: true,
-          pointStyle: 'circle'
-        }
+        display: false // Hide legend to save space - using custom legend below
       },
       title: { 
-        display: true, 
-        text: `Subject Performance Comparison - ${student.name}`,
-        font: {
-          size: 18,
-          weight: 'bold'
-        },
-        padding: 20
+        display: false // Hide title to save space - using custom title
       },
       tooltip: {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -182,11 +182,11 @@ const IndividualReport = ({ student, classData }) => {
         bodyColor: '#fff',
         borderColor: 'rgba(99, 102, 241, 0.5)',
         borderWidth: 1,
-        cornerRadius: 8,
+        cornerRadius: 6,
         displayColors: true,
         callbacks: {
           label: function(context) {
-            return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} marks`;
+            return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}`;
           }
         }
       }
@@ -197,9 +197,9 @@ const IndividualReport = ({ student, classData }) => {
         max: 100,
         title: {
           display: true,
-          text: 'Marks (%)',
+          text: 'Marks',
           font: {
-            size: 14,
+            size: 11,
             weight: 'bold'
           }
         },
@@ -209,27 +209,22 @@ const IndividualReport = ({ student, classData }) => {
         },
         ticks: {
           font: {
-            size: 12
+            size: 10
           }
         }
       },
       x: {
         title: {
-          display: true,
-          text: 'Subjects',
-          font: {
-            size: 14,
-            weight: 'bold'
-          }
+          display: false // Hide to save space
         },
         grid: {
           display: false
         },
         ticks: {
-          maxRotation: 45,
+          maxRotation: 30,
           minRotation: 0,
           font: {
-            size: 11
+            size: 9
           }
         }
       }
@@ -295,6 +290,53 @@ const IndividualReport = ({ student, classData }) => {
     subtitle: {
       color: '#777',
       fontSize: '16px'
+    },
+    topSection: {
+      display: 'flex',
+      gap: '20px',
+      marginBottom: '25px',
+      '@media (max-width: 768px)': {
+        flexDirection: 'column'
+      }
+    },
+    studentInfoCompact: {
+      flex: '0 0 300px',
+      padding: '20px',
+      backgroundColor: '#f8f9fa',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+      border: '1px solid #e9ecef'
+    },
+    chartContainer: {
+      flex: '1',
+      padding: '20px',
+      backgroundColor: '#fff',
+      borderRadius: '12px',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+      border: '2px solid #e9ecef',
+      minHeight: '300px'
+    },
+    chartTitle: {
+      color: '#2c3e50',
+      fontSize: '16px',
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: '15px',
+      borderBottom: '2px solid #3498db',
+      paddingBottom: '8px'
+    },
+    chartWrapper: {
+      height: '220px',
+      marginBottom: '10px'
+    },
+    chartLegend: {
+      fontSize: '12px',
+      color: '#1565c0',
+      textAlign: 'center',
+      fontStyle: 'italic',
+      padding: '8px',
+      backgroundColor: '#f0f8ff',
+      borderRadius: '6px'
     },
     studentInfo: {
       marginBottom: '25px',
@@ -413,34 +455,50 @@ const IndividualReport = ({ student, classData }) => {
         </p>
       </div>
 
-      {/* Student Information */}
-      <div style={styles.studentInfo}>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Student Name:</span>
-          <span style={styles.value}>{student.name}</span>
+      {/* Student Information and Performance Chart Section */}
+      <div style={styles.topSection}>
+        {/* Student Information */}
+        <div style={styles.studentInfoCompact}>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Student Name:</span>
+            <span style={styles.value}>{student.name}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Class:</span>
+            <span style={styles.value}>{student.class}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Position:</span>
+            <span style={styles.value}>{studentPosition || '-'}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Total Marks:</span>
+            <span style={styles.value}>{totalMarks.toFixed(0)}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Overall Mean:</span>
+            <span style={styles.value}>
+              {typeof student.mean === 'number' ? student.mean.toFixed(1) : '-'}
+            </span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Overall Rubric:</span>
+            <span style={styles.value}>{overallRubric}</span>
+          </div>
         </div>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Class:</span>
-          <span style={styles.value}>{student.class}</span>
-        </div>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Position:</span>
-          <span style={styles.value}>{studentPosition || '-'}</span>
-        </div>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Total Marks:</span>
-          <span style={styles.value}>{totalMarks.toFixed(0)}</span>
-        </div>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Overall Mean:</span>
-          <span style={styles.value}>
-            {typeof student.mean === 'number' ? student.mean.toFixed(1) : '-'}
-          </span>
-        </div>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Overall Rubric:</span>
-          <span style={styles.value}>{overallRubric}</span>
-        </div>
+
+        {/* Performance Comparison Chart */}
+        {chartData && (
+          <div style={styles.chartContainer}>
+            <h3 style={styles.chartTitle}>📊 Performance vs Class Average</h3>
+            <div style={styles.chartWrapper}>
+              <Line data={chartData} options={chartOptions} />
+            </div>
+            <div style={styles.chartLegend}>
+              🔵 {student.name} | 🔴 Class Average
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Subject Performance Table */}
@@ -480,49 +538,7 @@ const IndividualReport = ({ student, classData }) => {
         </tbody>
       </table>
 
-      {/* Performance Comparison Chart */}
-      {chartData && (
-        <div style={{
-          marginBottom: '25px',
-          padding: '20px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '12px',
-          border: '2px solid #e9ecef',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
-        }}>
-          <h3 style={{ 
-            color: '#2c3e50', 
-            marginBottom: '20px', 
-            fontSize: '18px',
-            textAlign: 'center',
-            borderBottom: '2px solid #3498db',
-            paddingBottom: '10px'
-          }}>
-            📊 Performance Comparison Chart
-          </h3>
-          <div style={{ 
-            height: '400px', 
-            background: '#fff',
-            borderRadius: '8px',
-            padding: '15px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
-          }}>
-            <Line data={chartData} options={chartOptions} />
-          </div>
-          <div style={{
-            marginTop: '15px',
-            padding: '12px',
-            backgroundColor: '#e3f2fd',
-            borderRadius: '8px',
-            fontSize: '14px',
-            color: '#1565c0',
-            textAlign: 'center',
-            fontStyle: 'italic'
-          }}>
-            📈 Blue line shows {student.name}'s performance | 🔴 Red line shows class average
-          </div>
-        </div>
-      )}
+      
 
       
 
@@ -532,36 +548,38 @@ const IndividualReport = ({ student, classData }) => {
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: '#fff',
         border: 'none',
-        boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
+        boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+        padding: '12px',
+        marginBottom: '15px'
       }}>
         <h3 style={{ 
           color: '#fff', 
-          marginBottom: '20px', 
-          fontSize: '20px',
+          marginBottom: '12px', 
+          fontSize: '16px',
           textAlign: 'center',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)'
         }}>
           🎯 Overall Performance Summary
         </h3>
         <div style={{ 
-          marginBottom: '15px',
+          marginBottom: '10px',
           textAlign: 'center'
         }}>
           <span style={{ 
-            fontSize: '16px',
+            fontSize: '14px',
             fontWeight: 'bold',
             color: '#fff'
           }}>
             Student's Overall Rubric: 
           </span>
           <span style={{ 
-            padding: '8px 16px', 
-            borderRadius: '25px', 
+            padding: '6px 12px', 
+            borderRadius: '20px', 
             background: 'rgba(255, 255, 255, 0.2)',
             color: '#fff',
             fontWeight: '700',
-            fontSize: '16px',
-            marginLeft: '10px',
+            fontSize: '14px',
+            marginLeft: '8px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             backdropFilter: 'blur(10px)'
           }}>
@@ -570,16 +588,16 @@ const IndividualReport = ({ student, classData }) => {
         </div>
         <div style={{
           background: 'rgba(255, 255, 255, 0.1)',
-          padding: '15px',
-          borderRadius: '12px',
+          padding: '10px',
+          borderRadius: '8px',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255, 255, 255, 0.2)'
         }}>
           <p style={{
             ...styles.overallRemark,
             color: '#fff',
-            fontSize: '16px',
-            lineHeight: '1.6',
+            fontSize: '13px',
+            lineHeight: '1.4',
             textAlign: 'center',
             margin: '0'
           }}>

@@ -1,5 +1,7 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import IndividualReport from '../Components/IndividualReport';
 import ClassMarklist from '../Components/ClassMarklist';
 import ExamNavigation from '../Components/ExamNavigation';
@@ -12,6 +14,11 @@ const Reports = () => {
   const [selectedExamType, setSelectedExamType] = useState('All Exams');
   const [marklistClass, setMarklistClass] = useState('All Classes');
   const [loading, setLoading] = useState(true);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [studentSearchTerm, setStudentSearchTerm] = useState("");
+  const [printOrientation, setPrintOrientation] = useState("portrait");
+  const individualRef = useRef();
+  const classRef = useRef();
 
   // Fetch all results on component mount
   useEffect(() => {
@@ -19,9 +26,11 @@ const Reports = () => {
       try {
         setLoading(true);
         const results = await fetchResults();
-        setAllStudents(results);
+        // Ensure results is always an array
+        setAllStudents(Array.isArray(results) ? results : []);
       } catch (error) {
         console.error('Error fetching results:', error);
+        setAllStudents([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
@@ -31,7 +40,8 @@ const Reports = () => {
 
   // Filter students based on selected class and exam type for individual reports
   const filteredStudents = useMemo(() => {
-    let filtered = allStudents;
+    // Ensure allStudents is an array before filtering
+    let filtered = Array.isArray(allStudents) ? allStudents : [];
 
     if (selectedClass !== 'All Classes') {
       filtered = filtered.filter(student => student.class === selectedClass);
@@ -59,9 +69,23 @@ const Reports = () => {
     return [...studentsWithMean, ...studentsWithoutMean];
   }, [allStudents, selectedClass, selectedExamType]);
 
+    // Filter students based on search term
+    const searchFilteredStudents = useMemo(() => {
+      if (!studentSearchTerm.trim()) return filteredStudents;
+      return filteredStudents.filter(student => 
+        student.name?.toLowerCase().includes(studentSearchTerm.toLowerCase())
+      );
+    }, [filteredStudents, studentSearchTerm]);
+
+    const selectedStudent = useMemo(() =>
+      filteredStudents.find(s => (s.id || s._id) === selectedStudentId),
+      [filteredStudents, selectedStudentId]
+    );
+
   // Filter students for marklist based on marklist class selection
   const marklistStudents = useMemo(() => {
-    let filtered = allStudents;
+    // Ensure allStudents is an array before filtering
+    let filtered = Array.isArray(allStudents) ? allStudents : [];
 
     if (marklistClass !== 'All Classes') {
       filtered = filtered.filter(student => student.class === marklistClass);
@@ -100,25 +124,115 @@ const Reports = () => {
     return ['All Exams', ...examTypes];
   }, [allStudents]);
 
-  const [selectedStudentId, setSelectedStudentId] = useState("");
-  const [studentSearchTerm, setStudentSearchTerm] = useState("");
-  const [printOrientation, setPrintOrientation] = useState("portrait");
 
-  const individualRef = useRef();
-  const classRef = useRef();
+  // Download handlers
+  const handleDownloadIndividual = useCallback(async () => {
+    if (!selectedStudent || !individualRef.current) return;
 
-  // Filter students based on search term
-  const searchFilteredStudents = useMemo(() => {
-    if (!studentSearchTerm.trim()) return filteredStudents;
-    return filteredStudents.filter(student => 
-      student.name?.toLowerCase().includes(studentSearchTerm.toLowerCase())
-    );
-  }, [filteredStudents, studentSearchTerm]);
+    try {
+      // Hide buttons and navigation during capture
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .no-print { display: none !important; }
+        button { display: none !important; }
+        nav { display: none !important; }
+        .exam-nav { display: none !important; }
+      `;
+      document.head.appendChild(style);
 
-  const selectedStudent = useMemo(() =>
-    filteredStudents.find(s => (s.id || s._id) === selectedStudentId),
-    [filteredStudents, selectedStudentId]
-  );
+      const canvas = await html2canvas(individualRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: individualRef.current.scrollWidth,
+        height: individualRef.current.scrollHeight
+      });
+
+      // Remove the temporary style
+      document.head.removeChild(style);
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      const pdf = new jsPDF(printOrientation, 'mm', 'a4');
+      let position = 0;
+
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`Individual_Report_${selectedStudent.name}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  }, [selectedStudent, printOrientation]);
+
+  const handleDownloadClass = useCallback(async () => {
+    if (!classRef.current || marklistStudents.length === 0) return;
+
+    try {
+      // Hide buttons and navigation during capture
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .no-print { display: none !important; }
+        button { display: none !important; }
+        nav { display: none !important; }
+        .exam-nav { display: none !important; }
+      `;
+      document.head.appendChild(style);
+
+      const canvas = await html2canvas(classRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: classRef.current.scrollWidth,
+        height: classRef.current.scrollHeight
+      });
+
+      // Remove the temporary style
+      document.head.removeChild(style);
+
+      const orientation = printOrientation === 'landscape' ? 'l' : 'p';
+      const pdf = new jsPDF(orientation, 'mm', 'a4');
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const canvasAspectRatio = canvas.height / canvas.width;
+      const pdfAspectRatio = pdfHeight / pdfWidth;
+
+      let imgWidth, imgHeight;
+      if (canvasAspectRatio > pdfAspectRatio) {
+        imgHeight = pdfHeight;
+        imgWidth = imgHeight / canvasAspectRatio;
+      } else {
+        imgWidth = pdfWidth;
+        imgHeight = imgWidth * canvasAspectRatio;
+      }
+
+      const x = (pdfWidth - imgWidth) / 2;
+      const y = (pdfHeight - imgHeight) / 2;
+
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight);
+
+      const className = marklistClass !== 'All Classes' ? marklistClass : 'All';
+      pdf.save(`Class_Marklist_${className}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  }, [marklistStudents, marklistClass, printOrientation]);
+
 
   // Memoize print handlers for performance and to avoid unnecessary re-renders
   const handlePrintIndividual = useReactToPrint({
@@ -130,7 +244,7 @@ const Reports = () => {
         // Remove any existing print styles
         const existingStyles = document.querySelectorAll('[data-print-styles]');
         existingStyles.forEach(style => style.remove());
-        
+
         // Add new print styles with current orientation
         const printStyles = `
           @media print {
@@ -173,13 +287,13 @@ const Reports = () => {
             size: A4 ${printOrientation};
           }
         `;
-        
+
         const styleSheet = document.createElement('style');
         styleSheet.type = 'text/css';
         styleSheet.innerText = printStyles;
         styleSheet.setAttribute('data-print-styles', 'true');
         document.head.appendChild(styleSheet);
-        
+
         setTimeout(resolve, 100);
       });
     }
@@ -194,7 +308,7 @@ const Reports = () => {
         // Remove any existing print styles
         const existingStyles = document.querySelectorAll('[data-print-styles-marklist]');
         existingStyles.forEach(style => style.remove());
-        
+
         // Add new print styles with current orientation
         const printStyles = `
           @media print {
@@ -248,13 +362,13 @@ const Reports = () => {
             size: A4 ${printOrientation};
           }
         `;
-        
+
         const styleSheet = document.createElement('style');
         styleSheet.type = 'text/css';
         styleSheet.innerText = printStyles;
         styleSheet.setAttribute('data-print-styles-marklist', 'true');
         document.head.appendChild(styleSheet);
-        
+
         setTimeout(resolve, 100);
       });
     }
@@ -445,7 +559,7 @@ const Reports = () => {
               ))}
             </select>
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
             <label htmlFor="studentSearch" style={{ marginRight: '0.5em' }}>
               Search Students:
@@ -521,6 +635,7 @@ const Reports = () => {
           </label>
         </div>
 
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <button
           onClick={handlePrintIndividual}
           style={{
@@ -532,6 +647,19 @@ const Reports = () => {
         >
           Print Individual Report ({printOrientation})
         </button>
+        <button
+          onClick={handleDownloadIndividual}
+          style={{
+            ...styles.button,
+            backgroundColor: '#28a745',
+            opacity: !selectedStudent ? 0.6 : 1,
+            cursor: !selectedStudent ? 'not-allowed' : 'pointer'
+          }}
+          disabled={!selectedStudent}
+        >
+          📥 Download Individual Report (PDF)
+        </button>
+      </div>
       </div>
 
       <div>
@@ -568,13 +696,25 @@ const Reports = () => {
             selectedClass={marklistClass !== 'All Classes' ? marklistClass : null}
           />
         </div>
-        <button
-          onClick={handlePrintClass}
-          style={styles.button}
-          disabled={marklistStudents.length === 0}
-        >
-          Print Class Marklist ({printOrientation})
-        </button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            onClick={handlePrintClass}
+            style={styles.button}
+            disabled={marklistStudents.length === 0}
+          >
+            Print Class Marklist ({printOrientation})
+          </button>
+          <button
+            onClick={handleDownloadClass}
+            style={{
+              ...styles.button,
+              backgroundColor: '#28a745'
+            }}
+            disabled={marklistStudents.length === 0}
+          >
+            📥 Download Class Marklist (PDF)
+          </button>
+        </div>
       </div>
       </div>
     </div>
