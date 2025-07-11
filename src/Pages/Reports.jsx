@@ -417,16 +417,11 @@ const Reports = () => {
   ];
 
   const terms = ['Term 1', 'Term 2', 'Term 3'];
-
   const examTypes = [
     { value: 'opener', label: 'Opener' },
     { value: 'midterm', label: 'Midterm' },
     { value: 'endterm', label: 'Endterm' }
   ];
-
-  const [selectedClass, setSelectedClass] = useState('Playgroup');
-  const [selectedExamType, setSelectedExamType] = useState('opener');
-  const [selectedTerm, setSelectedTerm] = useState('Term 1');
 
   if (loading) {
     return (

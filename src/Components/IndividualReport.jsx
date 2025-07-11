@@ -757,11 +757,8 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
             backgroundColor: "#fff",
             padding: "10px",
             fontSize: "14px",
-            color: "#94a3b8",
-            fontStyle: "italic",
           }}
         >
-          [Space for class teacher's handwritten comments]
         </div>
       </div>
 
@@ -794,12 +791,8 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: "#fff",
-              color: "#94a3b8",
-              fontSize: "12px",
-              fontStyle: "italic",
             }}
           >
-            [Principal's Stamp]
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
