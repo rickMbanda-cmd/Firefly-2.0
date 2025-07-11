@@ -1,24 +1,18 @@
-import React, { useMemo } from 'react';
-import { Line } from 'react-chartjs-2';
+
+import React, { useMemo, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  LineElement,
-  PointElement,
   CategoryScale,
   LinearScale,
+  BarElement,
   Title,
   Tooltip,
   Legend,
-  Filler,
 } from 'chart.js';
 import { getSubjectsByClass, getSubjectDisplayName, getRubric } from '../Utils/subjectsByClass';
 
-// Add print styles
-// Print styles will be injected dynamically from the parent component
-
-ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend, Filler);
-
-
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const getSubjectRemark = (rubric) => {
   const remarks = {
@@ -28,7 +22,6 @@ const getSubjectRemark = (rubric) => {
     'Below Expectations (B.E)': 'Needs improved study habits'
   };
   
-  // Handle both full rubric names and abbreviated forms
   if (rubric === 'E.E' || rubric === 'Exceeds Expectations (E.E)') {
     return remarks['Exceeds Expectations (E.E)'];
   }
@@ -55,12 +48,69 @@ const getOverallRemark = (rubric) => {
   return remarks[rubric] || remarks['Below Expectations (B.E)'];
 };
 
-const IndividualReport = ({ student, classData }) => {
+const getTrendAnalysis = (currentStudent, historicalData) => {
+  if (!historicalData || historicalData.length === 0) {
+    return null;
+  }
 
-  // Get subjects from the student's class
+  const currentMean = currentStudent.mean;
+  const previousMean = historicalData[historicalData.length - 1]?.mean;
+  
+  if (!previousMean || !currentMean) return null;
+
+  const improvement = currentMean - previousMean;
+  const percentageChange = ((improvement / previousMean) * 100).toFixed(1);
+
+  let trend = '';
+  let trendIcon = '';
+  let trendColor = '';
+
+  if (improvement > 5) {
+    trend = 'Significant Improvement';
+    trendIcon = '📈';
+    trendColor = '#10b981';
+  } else if (improvement > 0) {
+    trend = 'Slight Improvement';
+    trendIcon = '📊';
+    trendColor = '#059669';
+  } else if (improvement > -5) {
+    trend = 'Stable Performance';
+    trendIcon = '📉';
+    trendColor = '#f59e0b';
+  } else {
+    trend = 'Needs Attention';
+    trendIcon = '⚠️';
+    trendColor = '#ef4444';
+  }
+
+  return {
+    trend,
+    trendIcon,
+    trendColor,
+    improvement: improvement.toFixed(1),
+    percentageChange
+  };
+};
+
+const getPerformanceDeviation = (studentMean, classMean) => {
+  if (!studentMean || !classMean) return null;
+  
+  const deviation = studentMean - classMean;
+  const deviationType = deviation >= 0 ? 'above' : 'below';
+  
+  return {
+    value: Math.abs(deviation).toFixed(1),
+    type: deviationType,
+    color: deviation >= 0 ? '#10b981' : '#ef4444'
+  };
+};
+
+const IndividualReport = ({ student, classData, historicalData = [] }) => {
+  const [teacherComment, setTeacherComment] = useState('');
+  const [principalStamp, setPrincipalStamp] = useState(false);
+
   const subjects = getSubjectsByClass(student.class);
 
-  // Extract subject marks and calculate total
   const subjectMarks = {};
   let totalMarks = 0;
   subjects.forEach(subject => {
@@ -71,7 +121,6 @@ const IndividualReport = ({ student, classData }) => {
     }
   });
 
-  // Calculate class statistics and subject averages
   const classStats = useMemo(() => {
     if (!classData || classData.length === 0) return null;
 
@@ -86,7 +135,6 @@ const IndividualReport = ({ student, classData }) => {
     const highest = Math.max(...validMeans);
     const lowest = Math.min(...validMeans);
 
-    // Calculate subject-wise class averages
     const subjectAverages = {};
     subjects.forEach(subject => {
       const subjectScores = classData
@@ -101,35 +149,12 @@ const IndividualReport = ({ student, classData }) => {
     return { average, highest, lowest, subjectAverages };
   }, [classData, subjects]);
 
-  // Create chart data for student vs class comparison
   const chartData = useMemo(() => {
     if (!classStats || !classStats.subjectAverages) return null;
 
     const studentScores = subjects.map(subject => parseFloat(student[subject]) || 0);
     const classAverages = subjects.map(subject => classStats.subjectAverages[subject] || 0);
-    const subjectLabels = subjects.map(subject => {
-      const displayName = {
-        'english': 'English',
-        'kiswahili': 'Kiswahili',
-        'mathematics': 'Mathematics',
-        'science': 'Science',
-        'socialStudies': 'Social Studies',
-        'creativeArts': 'Creative Arts',
-        'religiousEducation': 'Religious Education',
-        'physicalEducation': 'Physical Education',
-        'homeScience': 'Home Science',
-        'agriculture': 'Agriculture',
-        'premath': 'Pre-Math',
-        'preTechnical': 'Pre-Technical',
-        'environmentalActivities': 'Environmental Activities',
-        'pshe': 'PSHE',
-        'hygiene': 'Hygiene',
-        'languageActivities': 'Language Activities',
-        'literacy': 'Literacy',
-        'numeracy': 'Numeracy'
-      };
-      return displayName[subject] || subject;
-    });
+    const subjectLabels = subjects.map(subject => getSubjectDisplayName(subject));
 
     return {
       labels: subjectLabels,
@@ -137,30 +162,20 @@ const IndividualReport = ({ student, classData }) => {
         {
           label: `${student.name} (Individual)`,
           data: studentScores,
+          backgroundColor: 'rgba(99, 102, 241, 0.8)',
           borderColor: 'rgba(99, 102, 241, 1)',
-          backgroundColor: 'rgba(99, 102, 241, 0.1)',
-          tension: 0.4,
-          pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 3,
-          pointRadius: 8,
-          pointHoverRadius: 10,
-          borderWidth: 4,
-          fill: true
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false,
         },
         {
           label: 'Class Average',
           data: classAverages,
+          backgroundColor: 'rgba(239, 68, 68, 0.8)',
           borderColor: 'rgba(239, 68, 68, 1)',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          tension: 0.4,
-          pointBackgroundColor: 'rgba(239, 68, 68, 1)',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 3,
-          pointRadius: 8,
-          pointHoverRadius: 10,
-          borderWidth: 4,
-          fill: true
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false,
         }
       ]
     };
@@ -171,10 +186,10 @@ const IndividualReport = ({ student, classData }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: { 
-        display: false // Hide legend to save space - using custom legend below
+        display: false
       },
       title: { 
-        display: false // Hide title to save space - using custom title
+        display: false
       },
       tooltip: {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -215,7 +230,7 @@ const IndividualReport = ({ student, classData }) => {
       },
       x: {
         title: {
-          display: false // Hide to save space
+          display: false
         },
         grid: {
           display: false
@@ -228,21 +243,19 @@ const IndividualReport = ({ student, classData }) => {
           }
         }
       }
-    },
-    elements: {
-      point: {
-        hoverBackgroundColor: '#fff',
-        hoverBorderWidth: 4
-      }
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index'
     }
   };
 
-  // Get student's position in class - use the position already assigned to the student
+  // Calculate student position
+  const totalStudents = classData ? classData.length : 0;
   const studentPosition = student.position || null;
+  const positionText = studentPosition ? `Position ${studentPosition} out of ${totalStudents}` : '-';
+
+  // Get trend analysis
+  const trendAnalysis = getTrendAnalysis(student, historicalData);
+
+  // Get performance deviation
+  const deviation = getPerformanceDeviation(student.mean, classStats?.average);
 
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const examType = student.examType;
@@ -251,6 +264,9 @@ const IndividualReport = ({ student, classData }) => {
                          examType === 'endterm' ? 'Endterm' : examType;
 
   const overallRubric = student.rubric || getRubric(student.mean);
+
+  const shouldShowTrend = !(student.examType === 'opener' && student.term === 'Term 1');
+  const shouldShowDeviation = !(student.examType === 'opener' && student.term === 'Term 1');
 
   const styles = {
     container: {
@@ -338,12 +354,6 @@ const IndividualReport = ({ student, classData }) => {
       backgroundColor: '#f0f8ff',
       borderRadius: '6px'
     },
-    studentInfo: {
-      marginBottom: '25px',
-      padding: '15px',
-      backgroundColor: '#f8f9fa',
-      borderRadius: '6px'
-    },
     infoRow: {
       display: 'flex',
       justifyContent: 'space-between',
@@ -383,27 +393,12 @@ const IndividualReport = ({ student, classData }) => {
     tableRowOdd: {
       backgroundColor: '#fff'
     },
-    statsSection: {
-      marginBottom: '25px',
+    trendSection: {
       padding: '15px',
-      backgroundColor: '#f8f9fa',
-      borderRadius: '6px'
-    },
-    statsGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-      gap: '15px'
-    },
-    statItem: {
-      display: 'flex',
-      justifyContent: 'space-between'
-    },
-    statLabel: {
-      fontWeight: 'bold',
-      color: '#495057'
-    },
-    statValue: {
-      color: '#6c757d'
+      background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+      borderRadius: '12px',
+      marginBottom: '20px',
+      border: '2px solid #2196f3'
     },
     remarksSection: {
       padding: '15px',
@@ -416,29 +411,45 @@ const IndividualReport = ({ student, classData }) => {
       lineHeight: '1.5',
       color: '#495057'
     },
-    signatureSection: {
-      display: 'flex',
-      justifyContent: 'space-around',
-      marginTop: '30px'
+    teacherSection: {
+      marginTop: '20px',
+      padding: '15px',
+      backgroundColor: '#f0f8ff',
+      borderRadius: '8px',
+      border: '1px solid #b3d9ff'
     },
-    signature: {
+    textarea: {
+      width: '100%',
+      minHeight: '80px',
+      padding: '10px',
+      border: '1px solid #ddd',
+      borderRadius: '6px',
+      fontSize: '14px',
+      resize: 'vertical'
+    },
+    principalSection: {
+      marginTop: '20px',
+      padding: '15px',
+      backgroundColor: '#fff5f5',
+      borderRadius: '8px',
+      border: '1px solid #fecaca',
       textAlign: 'center'
     },
-    signatureLine: {
-      borderBottom: '1px solid #000',
-      marginBottom: '5px',
+    stampBox: {
       width: '150px',
-      margin: '0 auto'
-    },
-    signatureLabel: {
-      color: '#777',
-      fontSize: '14px'
+      height: '80px',
+      border: '2px dashed #ef4444',
+      margin: '10px auto',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '8px',
+      backgroundColor: principalStamp ? '#fee2e2' : 'transparent'
     }
   };
 
   return (
     <div style={styles.container} className="print-container">
-      {/* Letterhead Header */}
       <div style={styles.letterheadContainer}>
         <img 
           src="Letterhead.png" 
@@ -447,17 +458,14 @@ const IndividualReport = ({ student, classData }) => {
         />
       </div>
 
-      {/* Report Title */}
       <div style={styles.titleSection}>
         <h2 style={styles.reportTitle}>INDIVIDUAL ACADEMIC REPORT</h2>
         <p style={styles.subtitle}>
-          {displayExamType} Examination - {currentDate}
+          {student.term} - {displayExamType} Examination - {currentDate}
         </p>
       </div>
 
-      {/* Student Information and Performance Chart Section */}
       <div style={styles.topSection}>
-        {/* Student Information */}
         <div style={styles.studentInfoCompact}>
           <div style={styles.infoRow}>
             <span style={styles.label}>Student Name:</span>
@@ -468,8 +476,12 @@ const IndividualReport = ({ student, classData }) => {
             <span style={styles.value}>{student.class}</span>
           </div>
           <div style={styles.infoRow}>
+            <span style={styles.label}>Term:</span>
+            <span style={styles.value}>{student.term}</span>
+          </div>
+          <div style={styles.infoRow}>
             <span style={styles.label}>Position:</span>
-            <span style={styles.value}>{studentPosition || '-'}</span>
+            <span style={styles.value}>{positionText}</span>
           </div>
           <div style={styles.infoRow}>
             <span style={styles.label}>Total Marks:</span>
@@ -485,14 +497,21 @@ const IndividualReport = ({ student, classData }) => {
             <span style={styles.label}>Overall Rubric:</span>
             <span style={styles.value}>{overallRubric}</span>
           </div>
+          {shouldShowDeviation && deviation && (
+            <div style={styles.infoRow}>
+              <span style={styles.label}>Deviation:</span>
+              <span style={{...styles.value, color: deviation.color}}>
+                {deviation.value} points {deviation.type} class average
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Performance Comparison Chart */}
         {chartData && (
           <div style={styles.chartContainer}>
             <h3 style={styles.chartTitle}>📊 Performance vs Class Average</h3>
             <div style={styles.chartWrapper}>
-              <Line data={chartData} options={chartOptions} />
+              <Bar data={chartData} options={chartOptions} />
             </div>
             <div style={styles.chartLegend}>
               🔵 {student.name} | 🔴 Class Average
@@ -501,7 +520,43 @@ const IndividualReport = ({ student, classData }) => {
         )}
       </div>
 
-      {/* Subject Performance Table */}
+      {shouldShowTrend && trendAnalysis && (
+        <div style={styles.trendSection}>
+          <h3 style={{ 
+            color: '#1565c0', 
+            marginBottom: '15px', 
+            fontSize: '18px',
+            textAlign: 'center'
+          }}>
+            📈 Performance Trend Analysis
+          </h3>
+          <div style={{ textAlign: 'center' }}>
+            <span style={{
+              fontSize: '24px',
+              marginRight: '10px'
+            }}>
+              {trendAnalysis.trendIcon}
+            </span>
+            <span style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: trendAnalysis.trendColor
+            }}>
+              {trendAnalysis.trend}
+            </span>
+          </div>
+          <p style={{ 
+            textAlign: 'center', 
+            marginTop: '10px',
+            fontSize: '14px',
+            color: '#555'
+          }}>
+            Performance change: {trendAnalysis.improvement > 0 ? '+' : ''}{trendAnalysis.improvement} points 
+            ({trendAnalysis.percentageChange}% {trendAnalysis.improvement >= 0 ? 'improvement' : 'decline'})
+          </p>
+        </div>
+      )}
+
       <h3 style={{ color: '#2c3e50', marginBottom: '15px', fontSize: '18px' }}>Subject Performance</h3>
 
       <table style={styles.table}>
@@ -538,11 +593,6 @@ const IndividualReport = ({ student, classData }) => {
         </tbody>
       </table>
 
-      
-
-      
-
-      {/* Overall Performance Summary */}
       <div style={{
         ...styles.remarksSection,
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -606,7 +656,49 @@ const IndividualReport = ({ student, classData }) => {
         </div>
       </div>
 
-      
+      <div className="no-print" style={styles.teacherSection}>
+        <h3 style={{ color: '#1565c0', marginBottom: '10px' }}>📝 Class Teacher's Comments</h3>
+        <textarea
+          style={styles.textarea}
+          value={teacherComment}
+          onChange={(e) => setTeacherComment(e.target.value)}
+          placeholder="Enter class teacher's comments about the student's performance..."
+        />
+      </div>
+
+      <div className="no-print" style={styles.principalSection}>
+        <h3 style={{ color: '#dc2626', marginBottom: '10px' }}>🎯 Principal's Approval</h3>
+        <div style={styles.stampBox}>
+          {principalStamp ? '✅ APPROVED' : 'PRINCIPAL STAMP'}
+        </div>
+        <button
+          onClick={() => setPrincipalStamp(!principalStamp)}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: principalStamp ? '#ef4444' : '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            marginTop: '10px'
+          }}
+        >
+          {principalStamp ? 'Remove Stamp' : 'Apply Stamp'}
+        </button>
+      </div>
+
+      {teacherComment && (
+        <div style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: '#f0f8ff',
+          borderRadius: '8px',
+          border: '1px solid #b3d9ff'
+        }}>
+          <h4 style={{ color: '#1565c0', marginBottom: '10px' }}>Class Teacher's Comments:</h4>
+          <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>{teacherComment}</p>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './examNavigationStyles.css';
@@ -41,20 +40,19 @@ const ExamNavigation = ({ user, logout }) => {
               Results Manager
             </button>
           </Link>
-        </div>
-
-        {/* User Menu */}
-        <div className="user-menu">
-          <div className="user-info">
-            <span className="user-name">👤 {user?.name || user?.username}</span>
-            <span className="user-role">({user?.role})</span>
-          </div>
           <button 
+            className="nav-button logout-button" 
             onClick={logout}
-            className="logout-btn"
-            title="Logout"
+            style={{ 
+              backgroundColor: '#ef4444', 
+              marginLeft: '20px',
+              border: 'none',
+              color: 'white',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
           >
-            🚪 Logout
+            Logout
           </button>
         </div>
       </div>

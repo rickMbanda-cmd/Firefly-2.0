@@ -1,15 +1,17 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../Components/styles.css';
-
-const classes = [
-  'Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3',
-  'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'
-];
+import ExamNavigation from '../Components/ExamNavigation';
 
 const Dashboard = () => {
-  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedClass, setSelectedClass] = useState('Playgroup');
+  const [selectedTerm, setSelectedTerm] = useState('Term 1');
+
+  const classes = [
+    'Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 
+    'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'
+  ];
+
+  const terms = ['Term 1', 'Term 2', 'Term 3'];
 
   const styles = {
     container: {
@@ -21,31 +23,15 @@ const Dashboard = () => {
     contentWrapper: {
       maxWidth: '1200px',
       margin: '0 auto',
-      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
-      backgroundImage: 'url(/Kids.jpg)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundBlendMode: 'overlay',
+      background: 'rgba(255, 255, 255, 0.95)',
       borderRadius: '24px',
       padding: '40px',
-      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2)',
-      backdropFilter: 'blur(15px)'
+      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+      backdropFilter: 'blur(10px)'
     },
     header: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '20px',
-      marginBottom: '40px',
-      padding: '30px',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      borderRadius: '16px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
-    },
-    logo: {
-      height: '80px',
-      width: 'auto',
-      borderRadius: '12px',
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+      textAlign: 'center',
+      marginBottom: '40px'
     },
     title: {
       fontSize: '3rem',
@@ -57,47 +43,35 @@ const Dashboard = () => {
       letterSpacing: '-1px'
     },
     subtitle: {
-      fontSize: '1.3rem',
+      fontSize: '1.2rem',
       color: '#6b7280',
       fontWeight: '500',
       marginTop: '8px'
     },
-    motto: {
-      fontSize: '1.1rem',
-      color: '#4a5568',
-      fontWeight: '600',
-      fontStyle: 'italic',
-      marginTop: '4px'
-    },
-    classSelectionSection: {
+    selectionSection: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '30px',
       marginBottom: '40px',
       padding: '30px',
-      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
       borderRadius: '16px',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
       border: '1px solid #e5e7eb'
     },
-    classSelectionTitle: {
-      fontSize: '1.8rem',
-      fontWeight: '700',
-      color: '#1f2937',
-      marginBottom: '20px',
-      textAlign: 'center'
-    },
-    dropdownContainer: {
+    selectionGroup: {
       display: 'flex',
-      justifyContent: 'center',
+      flexDirection: 'column',
       alignItems: 'center',
-      gap: '15px',
-      marginBottom: '30px'
+      gap: '15px'
     },
-    dropdownLabel: {
-      fontSize: '1.2rem',
-      fontWeight: '600',
-      color: '#374151'
+    label: {
+      fontSize: '1.3rem',
+      fontWeight: '700',
+      color: '#1f2937'
     },
     dropdown: {
-      padding: '12px 20px',
+      padding: '15px 25px',
       fontSize: '1.1rem',
       borderRadius: '12px',
       border: '2px solid #e5e7eb',
@@ -109,291 +83,165 @@ const Dashboard = () => {
       transition: 'all 0.3s ease'
     },
     examGrid: {
-      display: 'flex',
-      justifyContent: 'center',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
       gap: '24px',
-      marginBottom: '30px',
-      padding: '20px 0',
-      flexWrap: 'wrap'
+      marginTop: '30px'
     },
     examButton: {
-      padding: '24px 32px',
-      borderRadius: '20px',
-      border: 'none',
-      fontSize: '1.1rem',
-      fontWeight: '700',
-      cursor: 'pointer',
-      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-      textTransform: 'uppercase',
-      letterSpacing: '1px',
-      textDecoration: 'none',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      minHeight: '120px',
-      minWidth: '200px',
-      flex: '1',
-      maxWidth: '280px',
-      backdropFilter: 'blur(10px)',
-      transform: 'perspective(1000px) rotateX(0deg)',
-      transformStyle: 'preserve-3d'
-    },
-    openerBtn: {
-      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      color: '#fff',
-      boxShadow: '0 8px 32px rgba(16, 185, 129, 0.4), 0 4px 16px rgba(16, 185, 129, 0.2)'
-    },
-    midtermBtn: {
-      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-      color: '#fff',
-      boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4), 0 4px 16px rgba(59, 130, 246, 0.2)'
-    },
-    endtermBtn: {
-      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-      color: '#fff',
-      boxShadow: '0 8px 32px rgba(245, 158, 11, 0.4), 0 4px 16px rgba(245, 158, 11, 0.2)'
-    },
-    disabledBtn: {
-      background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
-      color: '#ffffff',
-      cursor: 'not-allowed',
-      opacity: 0.5,
-      transform: 'none',
-      boxShadow: '0 4px 16px rgba(156, 163, 175, 0.2)'
-    },
-    bottomButtons: {
-      display: 'flex',
-      justifyContent: 'center',
-      gap: '32px',
-      marginTop: '40px',
-      padding: '20px 0',
-      flexWrap: 'wrap'
-    },
-    bottomButton: {
-      padding: '24px 40px',
+      padding: '32px 24px',
       borderRadius: '20px',
       border: 'none',
+      fontSize: '1.2rem',
       fontWeight: '700',
-      fontSize: '1.1rem',
       cursor: 'pointer',
       textDecoration: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+      color: '#ffffff',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
       position: 'relative',
-      overflow: 'hidden',
-      minHeight: '90px',
-      minWidth: '300px',
-      maxWidth: '400px',
-      flex: '1',
-      textTransform: 'uppercase',
-      letterSpacing: '0.8px',
-      backdropFilter: 'blur(10px)',
-      transform: 'perspective(1000px) rotateX(0deg)'
+      overflow: 'hidden'
     },
-    reportsBtn: {
-      background: selectedClass 
-        ? 'linear-gradient(135deg, #2355d6 0%, #1e40af 100%)' 
-        : 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
-      color: selectedClass ? '#fff' : '#9ca3af',
-      boxShadow: selectedClass 
-        ? '0 8px 32px rgba(35, 85, 214, 0.4), 0 4px 16px rgba(35, 85, 214, 0.2)'
-        : '0 4px 16px rgba(156, 163, 175, 0.2)',
-      cursor: selectedClass ? 'pointer' : 'not-allowed'
+    openerButton: {
+      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
     },
-    managerBtn: {
-      background: selectedClass 
-        ? 'linear-gradient(135deg, #4f8cff 0%, #3b82f6 100%)' 
-        : 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
-      color: selectedClass ? '#fff' : '#9ca3af',
-      boxShadow: selectedClass 
-        ? '0 8px 32px rgba(79, 140, 255, 0.4), 0 4px 16px rgba(79, 140, 255, 0.2)'
-        : '0 4px 16px rgba(156, 163, 175, 0.2)',
-      cursor: selectedClass ? 'pointer' : 'not-allowed'
+    midtermButton: {
+      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+    },
+    endtermButton: {
+      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
     },
     buttonIcon: {
-      fontSize: '2rem',
-      marginBottom: '8px',
-      opacity: '0.9'
+      fontSize: '3rem',
+      marginBottom: '12px'
     },
     buttonText: {
-      fontSize: '1rem',
-      fontWeight: '600',
-      letterSpacing: '0.5px'
+      fontSize: '1.3rem',
+      fontWeight: '700'
+    },
+    currentSelection: {
+      textAlign: 'center',
+      padding: '20px',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      color: '#ffffff',
+      borderRadius: '16px',
+      marginBottom: '30px',
+      boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
     }
   };
 
   return (
     <div style={styles.container}>
+      <ExamNavigation />
       <div style={styles.contentWrapper}>
         <div style={styles.header}>
-          <img src="/logschool.png" alt="School Logo" style={styles.logo} />
-          <div>
-            <h1 style={styles.title}>Spring Valley Baptist School</h1>
-            <p style={styles.subtitle}>Student Results Management System</p>
-            <p style={styles.motto}>"God, Hardwork and Discipline"</p>
-          </div>
+          <h1 style={styles.title}>Academic Management System</h1>
+          <p style={styles.subtitle}>Comprehensive student performance tracking</p>
         </div>
 
-        <div style={styles.classSelectionSection}>
-          <h2 style={styles.classSelectionTitle}>Select Class & Exam Type</h2>
-          
-          <div style={styles.dropdownContainer}>
-            <label style={styles.dropdownLabel}>Class:</label>
+        <div style={styles.selectionSection}>
+          <div style={styles.selectionGroup}>
+            <label style={styles.label} htmlFor="termSelect">Select Term</label>
             <select
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
+              id="termSelect"
+              value={selectedTerm}
+              onChange={(e) => setSelectedTerm(e.target.value)}
               style={styles.dropdown}
             >
-              <option value="">Select a class...</option>
-              {classes.map(className => (
-                <option key={className} value={className}>
-                  {className}
-                </option>
+              {terms.map(term => (
+                <option key={term} value={term}>{term}</option>
               ))}
             </select>
           </div>
 
-          {selectedClass && (
-            <div style={styles.examGrid}>
-              <Link
-                to="/opener"
-                state={{ selectedClass }}
-                style={{ textDecoration: 'none' }}
-              >
-                <button 
-                  style={{...styles.examButton, ...styles.openerBtn}}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'perspective(1000px) rotateX(-5deg) translateY(-8px) scale(1.05)';
-                    e.target.style.boxShadow = '0 16px 48px rgba(16, 185, 129, 0.5), 0 8px 24px rgba(16, 185, 129, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'perspective(1000px) rotateX(0deg) translateY(0px) scale(1)';
-                    e.target.style.boxShadow = '0 8px 32px rgba(16, 185, 129, 0.4), 0 4px 16px rgba(16, 185, 129, 0.2)';
-                  }}
-                >
-                  <div style={styles.buttonIcon}>🚀</div>
-                  <div style={styles.buttonText}>Opener Exam</div>
-                </button>
-              </Link>
-              <Link
-                to="/midterm"
-                state={{ selectedClass }}
-                style={{ textDecoration: 'none' }}
-              >
-                <button 
-                  style={{...styles.examButton, ...styles.midtermBtn}}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'perspective(1000px) rotateX(-5deg) translateY(-8px) scale(1.05)';
-                    e.target.style.boxShadow = '0 16px 48px rgba(59, 130, 246, 0.5), 0 8px 24px rgba(59, 130, 246, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'perspective(1000px) rotateX(0deg) translateY(0px) scale(1)';
-                    e.target.style.boxShadow = '0 8px 32px rgba(59, 130, 246, 0.4), 0 4px 16px rgba(59, 130, 246, 0.2)';
-                  }}
-                >
-                  <div style={styles.buttonIcon}>📚</div>
-                  <div style={styles.buttonText}>Midterm Exam</div>
-                </button>
-              </Link>
-              <Link
-                to="/endterm"
-                state={{ selectedClass }}
-                style={{ textDecoration: 'none' }}
-              >
-                <button 
-                  style={{...styles.examButton, ...styles.endtermBtn}}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'perspective(1000px) rotateX(-5deg) translateY(-8px) scale(1.05)';
-                    e.target.style.boxShadow = '0 16px 48px rgba(245, 158, 11, 0.5), 0 8px 24px rgba(245, 158, 11, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'perspective(1000px) rotateX(0deg) translateY(0px) scale(1)';
-                    e.target.style.boxShadow = '0 8px 32px rgba(245, 158, 11, 0.4), 0 4px 16px rgba(245, 158, 11, 0.2)';
-                  }}
-                >
-                  <div style={styles.buttonIcon}>🏆</div>
-                  <div style={styles.buttonText}>Endterm Exam</div>
-                </button>
-              </Link>
-            </div>
-          )}
-
-          {!selectedClass && (
-            <div style={styles.examGrid}>
-              <button style={{...styles.examButton, ...styles.disabledBtn}} disabled>
-                <div style={styles.buttonIcon}>🚀</div>
-                <div style={styles.buttonText}>Opener Exam</div>
-              </button>
-              <button style={{...styles.examButton, ...styles.disabledBtn}} disabled>
-                <div style={styles.buttonIcon}>📚</div>
-                <div style={styles.buttonText}>Midterm Exam</div>
-              </button>
-              <button style={{...styles.examButton, ...styles.disabledBtn}} disabled>
-                <div style={styles.buttonIcon}>🏆</div>
-                <div style={styles.buttonText}>Endterm Exam</div>
-              </button>
-            </div>
-          )}
-
-          <div style={styles.bottomButtons}>
-            <Link 
-              to="/reports" 
-              state={{ selectedClass }} 
-              style={{ textDecoration: 'none', pointerEvents: selectedClass ? 'auto' : 'none' }}
+          <div style={styles.selectionGroup}>
+            <label style={styles.label} htmlFor="classSelect">Select Class</label>
+            <select
+              id="classSelect"
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              style={styles.dropdown}
             >
-              <button
-                style={{...styles.bottomButton, ...styles.reportsBtn}}
-                disabled={!selectedClass}
-                onMouseEnter={(e) => {
-                  if (selectedClass) {
-                    e.target.style.transform = 'perspective(1000px) rotateX(-3deg) translateY(-6px) scale(1.03)';
-                    e.target.style.boxShadow = '0 16px 48px rgba(35, 85, 214, 0.5), 0 8px 24px rgba(35, 85, 214, 0.3)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedClass) {
-                    e.target.style.transform = 'perspective(1000px) rotateX(0deg) translateY(0px) scale(1)';
-                    e.target.style.boxShadow = '0 8px 32px rgba(35, 85, 214, 0.4), 0 4px 16px rgba(35, 85, 214, 0.2)';
-                  }
-                }}
-              >
-                <span style={{ marginRight: '10px', fontSize: '1.2rem' }}>📊</span>
-                View Reports & Marklists
-              </button>
-            </Link>
-            <Link 
-              to="/results-manager" 
-              state={{ selectedClass }} 
-              style={{ textDecoration: 'none', pointerEvents: selectedClass ? 'auto' : 'none' }}
-            >
-              <button
-                style={{...styles.bottomButton, ...styles.managerBtn}}
-                disabled={!selectedClass}
-                onMouseEnter={(e) => {
-                  if (selectedClass) {
-                    e.target.style.transform = 'perspective(1000px) rotateX(-3deg) translateY(-6px) scale(1.03)';
-                    e.target.style.boxShadow = '0 16px 48px rgba(79, 140, 255, 0.5), 0 8px 24px rgba(79, 140, 255, 0.3)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedClass) {
-                    e.target.style.transform = 'perspective(1000px) rotateX(0deg) translateY(0px) scale(1)';
-                    e.target.style.boxShadow = '0 8px 32px rgba(79, 140, 255, 0.4), 0 4px 16px rgba(79, 140, 255, 0.2)';
-                  }
-                }}
-              >
-                <span style={{ marginRight: '10px', fontSize: '1.2rem' }}>⚙️</span>
-                Results Manager
-              </button>
-            </Link>
+              {classes.map(cls => (
+                <option key={cls} value={cls}>{cls}</option>
+              ))}
+            </select>
           </div>
+        </div>
+
+        <div style={styles.currentSelection}>
+          <h3>Current Selection: {selectedTerm} - {selectedClass}</h3>
+        </div>
+
+        <div style={styles.examGrid}>
+          <Link 
+            to="/opener" 
+            state={{ selectedClass, selectedTerm }}
+            style={{...styles.examButton, ...styles.openerButton}}
+          >
+            <div style={styles.buttonIcon}>🚀</div>
+            <div style={styles.buttonText}>Opener Exam</div>
+          </Link>
+
+          <Link 
+            to="/midterm" 
+            state={{ selectedClass, selectedTerm }}
+            style={{...styles.examButton, ...styles.midtermButton}}
+          >
+            <div style={styles.buttonIcon}>📚</div>
+            <div style={styles.buttonText}>Midterm Exam</div>
+          </Link>
+
+          <Link 
+            to="/endterm" 
+            state={{ selectedClass, selectedTerm }}
+            style={{...styles.examButton, ...styles.endtermButton}}
+          >
+            <div style={styles.buttonIcon}>🏆</div>
+            <div style={styles.buttonText}>Endterm Exam</div>
+          </Link>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <Link 
+            to="/reports" 
+            style={{
+              display: 'inline-block',
+              padding: '16px 32px',
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              color: '#ffffff',
+              textDecoration: 'none',
+              borderRadius: '12px',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              boxShadow: '0 8px 32px rgba(99, 102, 241, 0.3)',
+              transition: 'all 0.3s ease',
+              marginRight: '20px'
+            }}
+          >
+            📄 View Reports
+          </Link>
+
+          <Link 
+            to="/results-manager" 
+            style={{
+              display: 'inline-block',
+              padding: '16px 32px',
+              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              color: '#ffffff',
+              textDecoration: 'none',
+              borderRadius: '12px',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              boxShadow: '0 8px 32px rgba(20, 184, 166, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            ⚙️ Manage Results
+          </Link>
         </div>
       </div>
     </div>

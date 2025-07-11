@@ -13,11 +13,12 @@ const MidtermExam = () => {
     location.state?.selectedClass ||
     new URLSearchParams(location.search).get('class') ||
     'Playgroup';
+  const selectedTerm = location.state?.selectedTerm || 'Term 1';
 
   const subjects = getSubjectsByClass(selectedClass);
 
   const createInitialStudent = () => {
-    const student = { id: 1, name: '', mean: '', rubric: '', examType: 'midterm', class: selectedClass };
+    const student = { id: 1, name: '', mean: '', rubric: '', examType: 'midterm', class: selectedClass, term: selectedTerm };
     subjects.forEach(subject => {
       student[subject] = '';
     });
@@ -27,11 +28,11 @@ const MidtermExam = () => {
   const [students, setStudents] = useState([createInitialStudent()]);
 
   const saveStudent = async (student) => {
-    const studentWithClass = { ...student, class: selectedClass };
+    const studentWithClassAndTerm = { ...student, class: selectedClass, term: selectedTerm };
     if (student._id) {
-      await updateResult(student._id, studentWithClass);
+      await updateResult(student._id, studentWithClassAndTerm);
     } else {
-      await addResult(studentWithClass);
+      await addResult(studentWithClassAndTerm);
     }
   };
 
@@ -39,7 +40,7 @@ const MidtermExam = () => {
     setStudents(prevStudents => {
       return prevStudents.map(student => {
         if (student.id === id) {
-          const newStudent = { ...student, [field]: value, examType: 'midterm', class: selectedClass };
+          const newStudent = { ...student, [field]: value, examType: 'midterm', class: selectedClass, term: selectedTerm };
 
           // Calculate mean using all subjects for this class
           const subjectScores = subjects.map(subject => parseFloat(newStudent[subject])).filter(score => !isNaN(score));
@@ -60,7 +61,7 @@ const MidtermExam = () => {
 
   const addStudentRow = () => {
     const newId = students.length ? Math.max(...students.map(s => s.id)) + 1 : 1;
-    const newStudent = { id: newId, name: '', mean: '', rubric: '', examType: 'midterm', class: selectedClass };
+    const newStudent = { id: newId, name: '', mean: '', rubric: '', examType: 'midterm', class: selectedClass, term: selectedTerm };
     subjects.forEach(subject => {
       newStudent[subject] = '';
     });
@@ -128,7 +129,7 @@ const MidtermExam = () => {
           />
           <div>
             <h1 style={styles.title}>Midterm Exam Results</h1>
-            <p style={styles.subtitle}>Class: {selectedClass} | Enter and manage student scores</p>
+            <p style={styles.subtitle}>{selectedTerm} - Class: {selectedClass} | Enter and manage student scores</p>
           </div>
         </div>
         <DataEntryGrid

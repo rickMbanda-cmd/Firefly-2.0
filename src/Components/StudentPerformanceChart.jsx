@@ -1,10 +1,10 @@
 
 import React, { useState, useMemo } from 'react';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, LineElement, CategoryScale, LinearScale, PointElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { getSubjectsByClass, getSubjectDisplayName } from '../Utils/subjectsByClass';
 
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const StudentPerformanceChart = ({ students, selectedClass }) => {
   const [selectedId, setSelectedId] = useState(null);
@@ -38,24 +38,26 @@ const StudentPerformanceChart = ({ students, selectedClass }) => {
         {
           label: selectedStudent.name || `Student ${selectedStudent.id}`,
           data: studentScores,
-          borderColor: 'rgba(75,192,192,1)',
-          backgroundColor: 'rgba(75,192,192,0.2)',
-          tension: 0.4,
-          pointBackgroundColor: 'rgba(75,192,192,1)',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 6,
+          backgroundColor: 'rgba(99, 102, 241, 0.8)',
+          borderColor: 'rgba(99, 102, 241, 1)',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+          barThickness: 30,
+          categoryPercentage: 0.8,
+          barPercentage: 0.9,
         },
         {
           label: 'Class Average',
           data: classAverages,
-          borderColor: 'rgba(255,99,132,1)',
-          backgroundColor: 'rgba(255,99,132,0.2)',
-          tension: 0.4,
-          pointBackgroundColor: 'rgba(255,99,132,1)',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 6,
+          backgroundColor: 'rgba(239, 68, 68, 0.8)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+          barThickness: 30,
+          categoryPercentage: 0.8,
+          barPercentage: 0.9,
         }
       ]
     };
@@ -63,6 +65,7 @@ const StudentPerformanceChart = ({ students, selectedClass }) => {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { 
         position: 'top',
@@ -70,15 +73,34 @@ const StudentPerformanceChart = ({ students, selectedClass }) => {
           font: {
             size: 14,
             weight: 'bold'
-          }
+          },
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'rect'
         }
       },
       title: { 
         display: true, 
         text: `Performance Comparison - ${selectedStudent?.name || 'Select Student'}`,
         font: {
-          size: 16,
+          size: 18,
           weight: 'bold'
+        },
+        color: '#1f2937',
+        padding: 20
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: 'rgba(99, 102, 241, 0.5)',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+          }
         }
       }
     },
@@ -88,11 +110,22 @@ const StudentPerformanceChart = ({ students, selectedClass }) => {
         max: 100,
         title: {
           display: true,
-          text: 'Marks',
+          text: 'Marks (%)',
           font: {
             size: 14,
             weight: 'bold'
-          }
+          },
+          color: '#374151'
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)',
+          drawBorder: false
+        },
+        ticks: {
+          font: {
+            size: 12
+          },
+          color: '#6b7280'
         }
       },
       x: {
@@ -102,15 +135,36 @@ const StudentPerformanceChart = ({ students, selectedClass }) => {
           font: {
             size: 14,
             weight: 'bold'
-          }
+          },
+          color: '#374151'
+        },
+        grid: {
+          display: false
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 0,
+          font: {
+            size: 11
+          },
+          color: '#6b7280'
         }
       }
+    },
+    elements: {
+      bar: {
+        borderWidth: 2,
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
     }
   };
 
   return (
     <div className="student-performance-chart" style={{ marginTop: '2em' }}>
-      <label htmlFor="studentSelect" style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
+      <label htmlFor="studentSelect" style={{ fontWeight: 'bold', fontSize: '1.1em', color: '#374151' }}>
         Select Student for Performance Comparison: 
       </label>
       <select
@@ -118,14 +172,17 @@ const StudentPerformanceChart = ({ students, selectedClass }) => {
         value={selectedId || ""}
         onChange={(e) => setSelectedId(e.target.value)}
         style={{
-          padding: '0.5em 1em',
-          borderRadius: 8,
-          border: '1px solid #2355d6',
+          padding: '0.75em 1em',
+          borderRadius: 10,
+          border: '2px solid #6366f1',
           fontSize: '1em',
-          color: '#2355d6',
-          fontWeight: 500,
+          color: '#6366f1',
+          fontWeight: 600,
           background: '#fff',
-          marginLeft: '0.5em'
+          marginLeft: '0.5em',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          boxShadow: '0 4px 12px rgba(99, 102, 241, 0.15)'
         }}
       >
         <option value="" disabled>Select a student</option>
@@ -138,12 +195,14 @@ const StudentPerformanceChart = ({ students, selectedClass }) => {
       {selectedStudent && chartData && (
         <div style={{ 
           marginTop: '1.5em', 
-          backgroundColor: '#f8f9fa', 
-          padding: '1.5em', 
-          borderRadius: '10px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+          backgroundColor: '#ffffff', 
+          padding: '2em', 
+          borderRadius: '16px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+          border: '1px solid #e5e7eb',
+          height: '500px'
         }}>
-          <Line data={chartData} options={chartOptions} />
+          <Bar data={chartData} options={chartOptions} />
         </div>
       )}
     </div>
