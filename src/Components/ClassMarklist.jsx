@@ -82,14 +82,14 @@ const ClassMarklist = ({ students, selectedClass }) => {
     },
     reportTitle: {
       color: '#1e293b',
-      fontSize: '3rem',
+      fontSize: '2rem',
       fontWeight: '800',
       marginBottom: '12px',
       fontFamily: '"Inter", sans-serif',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
-      letterSpacing: '-2px',
+      letterSpacing: '-1px',
       textTransform: 'uppercase'
     },
     subtitle: {
@@ -162,14 +162,8 @@ const ClassMarklist = ({ students, selectedClass }) => {
       borderLeft: '4px solid transparent'
     },
     tableRowHover: {
-      borderLeft: '4px solid #667eea',
-      backgroundColor: '#f0f4ff !important',
-      transform: 'translateX(2px)',
-      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.1)'
-    },
-    tableRowHover: {
       cursor: 'pointer',
-      transition: 'background-color 0.2s ease'
+      transition: 'all 0.2s ease'
     },
     summarySection: {
       background: 'linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)',

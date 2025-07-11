@@ -109,6 +109,24 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
   const [teacherComment, setTeacherComment] = useState('');
   const [principalStamp, setPrincipalStamp] = useState(false);
 
+  // Class teacher mapping
+  const classTeachers = {
+    'Playgroup': 'Tr Fridah',
+    'PP1': 'Tr Jane',
+    'PP2': 'Tr Clarice',
+    'Grade 1': 'Teacher Margaret',
+    'Grade 2': 'Tr Emily',
+    'Grade 3': 'Tr Angel',
+    'Grade 4': 'Teacher Erick',
+    'Grade 5': 'Tr Webster',
+    'Grade 6': 'Tr Njeri',
+    'Grade 7': 'Tr David',
+    'Grade 8': 'Tr Ndichu',
+    'Grade 9': 'Tr Clinton'
+  };
+
+  const classTeacher = classTeachers[student.class] || 'Not Assigned';
+
   const subjects = getSubjectsByClass(student.class);
 
   const subjectMarks = {};
@@ -656,49 +674,65 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
         </div>
       </div>
 
-      <div className="no-print" style={styles.teacherSection}>
-        <h3 style={{ color: '#1565c0', marginBottom: '10px' }}>📝 Class Teacher's Comments</h3>
-        <textarea
-          style={styles.textarea}
-          value={teacherComment}
-          onChange={(e) => setTeacherComment(e.target.value)}
-          placeholder="Enter class teacher's comments about the student's performance..."
-        />
-      </div>
-
-      <div className="no-print" style={styles.principalSection}>
-        <h3 style={{ color: '#dc2626', marginBottom: '10px' }}>🎯 Principal's Approval</h3>
-        <div style={styles.stampBox}>
-          {principalStamp ? '✅ APPROVED' : 'PRINCIPAL STAMP'}
-        </div>
-        <button
-          onClick={() => setPrincipalStamp(!principalStamp)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: principalStamp ? '#ef4444' : '#10b981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            marginTop: '10px'
-          }}
-        >
-          {principalStamp ? 'Remove Stamp' : 'Apply Stamp'}
-        </button>
-      </div>
-
-      {teacherComment && (
+      {/* Class Teacher's Comments - Blank for manual writing */}
+      <div style={{
+        marginTop: '25px',
+        padding: '20px',
+        backgroundColor: '#f8fafc',
+        borderRadius: '12px',
+        border: '2px solid #e2e8f0',
+        minHeight: '120px'
+      }}>
+        <h3 style={{ color: '#1565c0', marginBottom: '15px', fontSize: '16px' }}>📝 Class Teacher's Comments</h3>
         <div style={{
-          marginTop: '20px',
-          padding: '15px',
-          backgroundColor: '#f0f8ff',
+          border: '1px solid #cbd5e1',
           borderRadius: '8px',
-          border: '1px solid #b3d9ff'
+          minHeight: '80px',
+          backgroundColor: '#fff',
+          padding: '10px',
+          fontSize: '14px',
+          color: '#94a3b8',
+          fontStyle: 'italic'
         }}>
-          <h4 style={{ color: '#1565c0', marginBottom: '10px' }}>Class Teacher's Comments:</h4>
-          <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>{teacherComment}</p>
+          [Space for class teacher's handwritten comments]
         </div>
-      )}
+      </div>
+
+      {/* Principal's Stamp - Blank space for physical stamp */}
+      <div style={{
+        marginTop: '25px',
+        padding: '20px',
+        backgroundColor: '#fef2f2',
+        borderRadius: '12px',
+        border: '2px solid #fecaca',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div>
+          <h3 style={{ color: '#dc2626', marginBottom: '5px', fontSize: '16px' }}>🎯 Principal's Stamp</h3>
+          <div style={{
+            width: '150px',
+            height: '80px',
+            border: '2px dashed #ef4444',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#fff',
+            color: '#94a3b8',
+            fontSize: '12px',
+            fontStyle: 'italic'
+          }}>
+            [Principal's Stamp]
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ margin: '0', fontSize: '14px', color: '#6b7280', fontWeight: '600' }}>
+            Class Teacher: {classTeacher}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

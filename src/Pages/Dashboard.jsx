@@ -138,7 +138,17 @@ const Dashboard = () => {
       <ExamNavigation />
       <div style={styles.contentWrapper}>
         <div style={styles.header}>
-          <h1 style={styles.title}>Academic Management System</h1>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '10px' }}>
+            <img 
+              src="/logschool.png" 
+              alt="School Logo" 
+              style={{ width: '80px', height: '80px', borderRadius: '50%', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
+            />
+            <h1 style={styles.title}>Spring Valley Baptist School</h1>
+          </div>
+          <p style={{ ...styles.subtitle, fontStyle: 'italic', color: '#6366f1', fontWeight: '600', fontSize: '1.1rem' }}>
+            "God, Hardwork and Discipline"
+          </p>
           <p style={styles.subtitle}>Comprehensive student performance tracking</p>
         </div>
 

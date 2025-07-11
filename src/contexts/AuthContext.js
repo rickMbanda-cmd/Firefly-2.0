@@ -19,6 +19,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
+    // Show logout feedback
+    if (window.confirm('You have been logged out successfully!')) {
+      window.location.reload();
+    }
   };
 
   return (

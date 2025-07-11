@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './examNavigationStyles.css';
 
-const ExamNavigation = ({ user, logout }) => {
+const ExamNavigation = () => {
   const location = useLocation();
+  const { logout } = useAuth();
 
   return (
     <nav className="exam-nav">

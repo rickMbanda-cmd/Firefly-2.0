@@ -9,19 +9,26 @@ import ExamNavigation from '../Components/ExamNavigation';
 import { getSubjectsByClass, getSubjectDisplayName, getRubric } from '../Utils/subjectsByClass';
 
 const examTypes = ['opener', 'midterm', 'endterm'];
+const terms = ['Term 1', 'Term 2', 'Term 3'];
 const classes = [
   'Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3',
   'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'
 ];
 
-const createEmptyResult = (examType, selectedClass) => {
+const showFeedback = (message, setFeedback) => {
+  setFeedback(message);
+  setTimeout(() => setFeedback(''), 3000);
+};
+
+const createEmptyResult = (examType, selectedClass, selectedTerm) => {
   const subjects = getSubjectsByClass(selectedClass);
   const result = {
     name: '',
     mean: '',
     rubric: '',
     examType: examType,
-    class: selectedClass || ''
+    class: selectedClass || '',
+    term: selectedTerm || 'Term 1'
   };
 
   // Initialize all subjects to empty string
@@ -38,16 +45,19 @@ const ResultsManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [selectedExamType, setSelectedExamType] = useState('opener');
   const [selectedClass, setSelectedClass] = useState('');
+  const [selectedTerm, setSelectedTerm] = useState('Term 1');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
     fetchResults().then(setResults);
   }, []);
 
   useEffect(() => {
-    // Reset form when class or exam type changes
-    setForm(createEmptyResult(selectedExamType, selectedClass));
+    // Reset form when class, exam type, or term changes
+    setForm(createEmptyResult(selectedExamType, selectedClass, selectedTerm));
     setEditingId(null);
-  }, [selectedClass, selectedExamType]);
+  }, [selectedClass, selectedExamType, selectedTerm]);
 
   const currentSubjects = getSubjectsByClass(selectedClass);
 
@@ -59,13 +69,15 @@ const ResultsManager = () => {
     setEditingId(result._id);
     setSelectedExamType(result.examType);
     setSelectedClass(result.class);
+    setSelectedTerm(result.term || 'Term 1');
 
     const editForm = {
       name: result.name,
       mean: result.mean,
       rubric: result.rubric,
       examType: result.examType,
-      class: result.class || ''
+      class: result.class || '',
+      term: result.term || 'Term 1'
     };
 
     // Get subjects for the result's class
@@ -83,6 +95,7 @@ const ResultsManager = () => {
     if (window.confirm('Are you sure you want to delete this result?')) {
       await deleteResult(id);
       setResults(results.filter(r => r._id !== id));
+      showFeedback('Result deleted successfully!', setFeedback);
     }
   };
 
@@ -101,24 +114,31 @@ const ResultsManager = () => {
     const formWithMean = { 
       ...form, 
       mean: mean.toFixed(2),
-      rubric: getRubric(mean)
+      rubric: getRubric(mean),
+      term: selectedTerm
     };
 
     if (editingId) {
       const updated = await updateResult(editingId, formWithMean);
       setResults(results.map(r => (r._id === editingId ? updated : r)));
       setEditingId(null);
+      showFeedback('Result updated successfully!', setFeedback);
     } else {
       const created = await addResult(formWithMean);
       setResults([...results, created]);
+      showFeedback('Result saved successfully!', setFeedback);
     }
-    setForm(createEmptyResult(selectedExamType, selectedClass));
+    setForm(createEmptyResult(selectedExamType, selectedClass, selectedTerm));
   };
 
-  // Filter results by selected exam type and class
-  const filteredResults = results.filter(
-    r => r.examType === selectedExamType && (!selectedClass || r.class === selectedClass)
-  );
+  // Filter results by selected exam type, class, term, and search query
+  const filteredResults = results.filter(r => {
+    const matchesExamType = r.examType === selectedExamType;
+    const matchesClass = !selectedClass || r.class === selectedClass;
+    const matchesTerm = r.term === selectedTerm;
+    const matchesSearch = !searchQuery || r.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesExamType && matchesClass && matchesTerm && matchesSearch;
+  });
 
   const styles = {
     container: {
@@ -337,17 +357,41 @@ const ResultsManager = () => {
           <p style={styles.subtitle}>Manage and organize student examination results</p>
         </div>
 
+        {feedback && (
+          <div style={{
+            padding: '12px 20px',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: '#fff',
+            borderRadius: '12px',
+            marginBottom: '20px',
+            textAlign: 'center',
+            fontWeight: '600',
+            boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)'
+          }}>
+            {feedback}
+          </div>
+        )}
+
         <div style={styles.filtersContainer}>
+          <div style={styles.filterGroup}>
+            <label style={styles.label}>Term</label>
+            <select
+              value={selectedTerm}
+              onChange={e => setSelectedTerm(e.target.value)}
+              style={styles.select}
+            >
+              {terms.map(term => (
+                <option key={term} value={term}>{term}</option>
+              ))}
+            </select>
+          </div>
+
           <div style={styles.filterGroup}>
             <label style={styles.label}>Exam Type</label>
             <select
               value={selectedExamType}
               onChange={e => setSelectedExamType(e.target.value)}
-              style={{
-                ...styles.select,
-                ':hover': { borderColor: '#3b82f6' },
-                ':focus': { borderColor: '#3b82f6', boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)' }
-              }}
+              style={styles.select}
             >
               {examTypes.map(type => (
                 <option key={type} value={type}>
@@ -369,6 +413,20 @@ const ResultsManager = () => {
                 <option key={cls} value={cls}>{cls}</option>
               ))}
             </select>
+          </div>
+
+          <div style={styles.filterGroup}>
+            <label style={styles.label}>Search Student</label>
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{
+                ...styles.select,
+                minWidth: '200px'
+              }}
+            />
           </div>
 
           <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
@@ -424,6 +482,18 @@ const ResultsManager = () => {
               ))}
             </select>
 
+            <select
+              name="term"
+              value={form.term || selectedTerm}
+              onChange={handleChange}
+              required
+              style={styles.select}
+            >
+              {terms.map(term => (
+                <option key={term} value={term}>{term}</option>
+              ))}
+            </select>
+
             <button 
               type="submit" 
               style={{
@@ -439,7 +509,7 @@ const ResultsManager = () => {
                 type="button" 
                 onClick={() => { 
                   setEditingId(null); 
-                  setForm(createEmptyResult(selectedExamType, selectedClass)); 
+                  setForm(createEmptyResult(selectedExamType, selectedClass, selectedTerm)); 
                 }}
                 style={styles.buttonSecondary}
               >
@@ -462,6 +532,7 @@ const ResultsManager = () => {
                   <th style={styles.th}>📊 Mean</th>
                   <th style={styles.th}>📋 Rubric</th>
                   <th style={styles.th}>🏫 Class</th>
+                  <th style={styles.th}>📅 Term</th>
                   <th style={{ ...styles.th, minWidth: '180px' }}>⚙️ Actions</th>
                 </tr>
               </thead>
@@ -516,6 +587,7 @@ const ResultsManager = () => {
                       </span>
                     </td>
                     <td style={styles.td}>{r.class}</td>
+                    <td style={styles.td}>{r.term || 'Term 1'}</td>
                     <td style={{ ...styles.td, minWidth: '180px', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <button 
