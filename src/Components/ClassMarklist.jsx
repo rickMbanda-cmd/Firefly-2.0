@@ -99,7 +99,7 @@ const ClassMarklist = ({ students, selectedClass }) => {
     },
     title: {
       color: '#2c3e50',
-      fontSize: '24px',
+      fontSize: '18px',
       fontWeight: 'bold',
       marginBottom: '25px',
       textAlign: 'center',
