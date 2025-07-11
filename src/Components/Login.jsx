@@ -9,7 +9,9 @@ const Login = () => {
 
   // Demo users for authentication
   const demoUsers = [
-    { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' }
+    { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' },
+    { username: 'teacher', password: 'teacher123', role: 'teacher', name: 'Teacher' },
+    { username: 'demo', password: 'demo123', role: 'viewer', name: 'Demo User' }
   ];
 
   const handleSubmit = (e) => {
@@ -26,10 +28,6 @@ const Login = () => {
         role: user.role
       });
       setError('');
-      // Show success feedback
-      setTimeout(() => {
-        alert('Login successful! Welcome to Spring Valley Baptist School System.');
-      }, 100);
     } else {
       setError('Invalid username or password');
     }
@@ -148,7 +146,12 @@ const Login = () => {
           </button>
         </form>
 
-        
+        <div style={styles.demoCredentials}>
+          <strong>Demo Credentials:</strong><br/>
+          Admin: admin / admin123<br/>
+          Teacher: teacher / teacher123<br/>
+          Demo: demo / demo123
+        </div>
       </div>
     </div>
   );

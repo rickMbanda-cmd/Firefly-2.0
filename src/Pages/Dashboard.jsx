@@ -92,23 +92,18 @@ const Dashboard = () => {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: '40px 32px',
-      borderRadius: '24px',
+      padding: '32px 24px',
+      borderRadius: '20px',
       border: 'none',
-      fontSize: '1.3rem',
+      fontSize: '1.2rem',
       fontWeight: '700',
       cursor: 'pointer',
       textDecoration: 'none',
       color: '#ffffff',
-      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-      boxShadow: '0 15px 50px rgba(0, 0, 0, 0.2)',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
       position: 'relative',
-      overflow: 'hidden',
-      transform: 'perspective(1000px) rotateX(0deg)',
-      '@media (max-width: 768px)': {
-        padding: '30px 20px',
-        fontSize: '1.1rem'
-      }
+      overflow: 'hidden'
     },
     openerButton: {
       background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
@@ -143,22 +138,7 @@ const Dashboard = () => {
       <ExamNavigation />
       <div style={styles.contentWrapper}>
         <div style={styles.header}>
-          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '10px'}}>
-            <img 
-              src="/logschool.png" 
-              alt="School Logo" 
-              style={{
-                height: '80px',
-                width: 'auto',
-                borderRadius: '16px',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-              }}
-            />
-            <h1 style={styles.title}>Spring Valley Baptist School</h1>
-          </div>
-          <p style={{...styles.subtitle, fontStyle: 'italic', color: '#8b5cf6', fontWeight: '600', fontSize: '1.1rem'}}>
-            "God, Hardwork and Discipline"
-          </p>
+          <h1 style={styles.title}>Academic Management System</h1>
           <p style={styles.subtitle}>Comprehensive student performance tracking</p>
         </div>
 
@@ -201,54 +181,27 @@ const Dashboard = () => {
             to="/opener" 
             state={{ selectedClass, selectedTerm }}
             style={{...styles.examButton, ...styles.openerButton}}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-              e.currentTarget.style.boxShadow = '0 25px 60px rgba(16, 185, 129, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 15px 50px rgba(0, 0, 0, 0.2)';
-            }}
           >
             <div style={styles.buttonIcon}>🚀</div>
             <div style={styles.buttonText}>Opener Exam</div>
-            <div style={{fontSize: '0.9rem', opacity: '0.9', marginTop: '8px'}}>Start of Term Assessment</div>
           </Link>
 
           <Link 
             to="/midterm" 
             state={{ selectedClass, selectedTerm }}
             style={{...styles.examButton, ...styles.midtermButton}}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-              e.currentTarget.style.boxShadow = '0 25px 60px rgba(245, 158, 11, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 15px 50px rgba(0, 0, 0, 0.2)';
-            }}
           >
             <div style={styles.buttonIcon}>📚</div>
             <div style={styles.buttonText}>Midterm Exam</div>
-            <div style={{fontSize: '0.9rem', opacity: '0.9', marginTop: '8px'}}>Mid-Term Evaluation</div>
           </Link>
 
           <Link 
             to="/endterm" 
             state={{ selectedClass, selectedTerm }}
             style={{...styles.examButton, ...styles.endtermButton}}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-              e.currentTarget.style.boxShadow = '0 25px 60px rgba(239, 68, 68, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 15px 50px rgba(0, 0, 0, 0.2)';
-            }}
           >
             <div style={styles.buttonIcon}>🏆</div>
             <div style={styles.buttonText}>Endterm Exam</div>
-            <div style={{fontSize: '0.9rem', opacity: '0.9', marginTop: '8px'}}>Final Term Assessment</div>
           </Link>
         </div>
 

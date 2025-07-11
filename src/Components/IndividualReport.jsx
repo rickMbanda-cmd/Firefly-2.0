@@ -105,25 +105,9 @@ const getPerformanceDeviation = (studentMean, classMean) => {
   };
 };
 
-const getClassTeacher = (className) => {
-  const classTeachers = {
-    'Playgroup': 'Tr Fridah',
-    'PP1': 'Tr Jane',
-    'PP2': 'Tr Clarice',
-    'Grade 1': 'Teacher Margaret',
-    'Grade 2': 'Tr Emily',
-    'Grade 3': 'Tr Angel',
-    'Grade 4': 'Teacher Erick',
-    'Grade 5': 'Tr Webster',
-    'Grade 6': 'Tr Njeri',
-    'Grade 7': 'Tr David',
-    'Grade 8': 'Tr Ndichu',
-    'Grade 9': 'Tr Clinton'
-  };
-  return classTeachers[className] || 'Class Teacher';
-};
-
 const IndividualReport = ({ student, classData, historicalData = [] }) => {
+  const [teacherComment, setTeacherComment] = useState('');
+  const [principalStamp, setPrincipalStamp] = useState(false);
 
   const subjects = getSubjectsByClass(student.class);
 
@@ -672,75 +656,49 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
         </div>
       </div>
 
-      <div style={styles.teacherSection}>
-        <h3 style={{ color: '#1565c0', marginBottom: '15px', textAlign: 'center' }}>📝 Class Teacher's Comments</h3>
-        <div style={{
-          minHeight: '100px',
-          border: '2px solid #b3d9ff',
-          borderRadius: '8px',
-          padding: '15px',
-          backgroundColor: '#f9fbff',
-          position: 'relative'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '10px',
-            right: '15px',
-            fontSize: '12px',
-            color: '#6b7280',
-            fontStyle: 'italic'
-          }}>
-            (To be filled by class teacher)
-          </div>
-          <div style={{
-            height: '80px',
-            borderBottom: '1px solid #e5e7eb',
-            marginBottom: '10px'
-          }}></div>
-          <div style={{
-            textAlign: 'right',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#374151'
-          }}>
-            Class Teacher: {getClassTeacher(student.class)}
-          </div>
-        </div>
+      <div className="no-print" style={styles.teacherSection}>
+        <h3 style={{ color: '#1565c0', marginBottom: '10px' }}>📝 Class Teacher's Comments</h3>
+        <textarea
+          style={styles.textarea}
+          value={teacherComment}
+          onChange={(e) => setTeacherComment(e.target.value)}
+          placeholder="Enter class teacher's comments about the student's performance..."
+        />
       </div>
 
-      <div style={styles.principalSection}>
-        <h3 style={{ color: '#dc2626', marginBottom: '15px', textAlign: 'center' }}>🎯 Principal's Stamp</h3>
-        <div style={{
-          width: '200px',
-          height: '120px',
-          border: '3px dashed #ef4444',
-          margin: '0 auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '12px',
-          backgroundColor: '#fef2f2',
-          position: 'relative'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '10px',
-            fontSize: '11px',
-            color: '#6b7280',
-            fontStyle: 'italic'
-          }}>
-            Principal's Official Stamp
-          </div>
-          <div style={{
-            fontSize: '12px',
-            color: '#9ca3af',
-            textAlign: 'center',
-            marginTop: '20px'
-          }}>
-            (Space for official stamp)
-          </div>
+      <div className="no-print" style={styles.principalSection}>
+        <h3 style={{ color: '#dc2626', marginBottom: '10px' }}>🎯 Principal's Approval</h3>
+        <div style={styles.stampBox}>
+          {principalStamp ? '✅ APPROVED' : 'PRINCIPAL STAMP'}
         </div>
+        <button
+          onClick={() => setPrincipalStamp(!principalStamp)}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: principalStamp ? '#ef4444' : '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            marginTop: '10px'
+          }}
+        >
+          {principalStamp ? 'Remove Stamp' : 'Apply Stamp'}
+        </button>
       </div>
+
+      {teacherComment && (
+        <div style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: '#f0f8ff',
+          borderRadius: '8px',
+          border: '1px solid #b3d9ff'
+        }}>
+          <h4 style={{ color: '#1565c0', marginBottom: '10px' }}>Class Teacher's Comments:</h4>
+          <p style={{ fontSize: '14px', lineHeight: '1.5', margin: '0' }}>{teacherComment}</p>
+        </div>
+      )}
     </div>
   );
 };
