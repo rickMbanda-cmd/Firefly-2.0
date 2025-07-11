@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { getSubjectsByClass, getSubjectDisplayName } from '../Utils/subjectsByClass';
 
@@ -93,10 +92,10 @@ const DataEntryGrid = ({ students, updateStudent, addStudentRow, saveStudent, se
     <div style={styles.container}>
       <div style={{ marginBottom: '20px' }}>
         <h3 style={{ color: '#2c3e50', fontSize: '18px', margin: 0 }}>
-          Weka marks - {selectedClass || 'Grade 1'}
+          Enter the marks - {selectedClass || 'Grade 1'}
         </h3>
       </div>
-      
+
       <div style={styles.tableWrapper}>
         <table style={styles.table}>
           <thead>
@@ -124,7 +123,12 @@ const DataEntryGrid = ({ students, updateStudent, addStudentRow, saveStudent, se
                     style={{...styles.input, ...styles.nameInput}}
                     type="text"
                     value={student.name || ''}
-                    onChange={e => updateStudent(student.id, 'name', e.target.value)}
+                    onChange={e => {
+                      const value = e.target.value;
+                      if (/^[a-zA-Z\s'-]*$/.test(value)) {
+                        updateStudent(student.id, 'name', value);
+                      }
+                    }}
                     placeholder="Student name"
                     onFocus={(e) => e.target.style.borderColor = '#4a90e2'}
                     onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -138,7 +142,17 @@ const DataEntryGrid = ({ students, updateStudent, addStudentRow, saveStudent, se
                       min="0"
                       max="100"
                       value={student[subject] || ''}
-                      onChange={e => updateStudent(student.id, subject, e.target.value)}
+                      onChange={e => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          updateStudent(student.id, subject, '');
+                          return;
+                        }
+                        const numValue = parseFloat(value);
+                        if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                          updateStudent(student.id, subject, value);
+                        }
+                      }}
                       placeholder="0-100"
                       onFocus={(e) => e.target.style.borderColor = '#4a90e2'}
                       onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -173,7 +187,7 @@ const DataEntryGrid = ({ students, updateStudent, addStudentRow, saveStudent, se
           </tbody>
         </table>
       </div>
-      
+
       <button 
         style={styles.addButton}
         onClick={addStudentRow}

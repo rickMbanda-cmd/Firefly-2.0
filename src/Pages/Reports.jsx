@@ -390,8 +390,43 @@ const Reports = () => {
       fontSize: '1.05em',
       transition: 'background 0.2s, transform 0.2s',
       boxShadow: '0 2px 8px rgba(79,140,255,0.08)'
+    },
+    filtersContainer: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '10px',
+        marginBottom: '1em'
+    },
+    filterGroup: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    label: {
+        marginBottom: '0.5em'
+    },
+    select: {
+        padding: '0.5em',
+        borderRadius: '5px',
+        border: '1px solid #ccc'
     }
   };
+
+  const classes = [
+    'Playgroup', 'PP1', 'PP2', 'Grade 1', 'Grade 2', 'Grade 3', 
+    'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'
+  ];
+
+  const terms = ['Term 1', 'Term 2', 'Term 3'];
+
+  const examTypes = [
+    { value: 'opener', label: 'Opener' },
+    { value: 'midterm', label: 'Midterm' },
+    { value: 'endterm', label: 'Endterm' }
+  ];
+
+  const [selectedClass, setSelectedClass] = useState('Playgroup');
+  const [selectedExamType, setSelectedExamType] = useState('opener');
+  const [selectedTerm, setSelectedTerm] = useState('Term 1');
 
   if (loading) {
     return (

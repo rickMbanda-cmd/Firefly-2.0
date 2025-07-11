@@ -120,8 +120,6 @@ const getPerformanceDeviation = (studentMean, classMean) => {
 };
 
 const IndividualReport = ({ student, classData, historicalData = [] }) => {
-  const [teacherComment, setTeacherComment] = useState("");
-  const [principalStamp, setPrincipalStamp] = useState(false);
 
   // Class teacher mapping
   const classTeachers = {
@@ -326,16 +324,12 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
       fontFamily: "Arial, sans-serif",
       maxWidth: "800px",
       margin: "0 auto",
-      padding: "20px",
+      padding: "15px",
       backgroundColor: "#fff",
       borderRadius: "8px",
       boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-      "@media print": {
-        boxShadow: "none",
-        margin: "0",
-        padding: "10px",
-        maxWidth: "none",
-      },
+      fontSize: "12px",
+      lineHeight: "1.3",
     },
     letterheadContainer: {
       textAlign: "center",
@@ -362,28 +356,27 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
     },
     topSection: {
       display: "flex",
-      gap: "20px",
-      marginBottom: "25px",
-      "@media (max-width: 768px)": {
-        flexDirection: "column",
-      },
+      gap: "15px",
+      marginBottom: "20px",
+      flexWrap: "wrap",
     },
     studentInfoCompact: {
-      flex: "0 0 300px",
-      padding: "20px",
+      flex: "0 0 280px",
+      padding: "15px",
       backgroundColor: "#f8f9fa",
-      borderRadius: "12px",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      borderRadius: "8px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
       border: "1px solid #e9ecef",
+      fontSize: "11px",
     },
     chartContainer: {
       flex: "1",
-      padding: "20px",
+      padding: "15px",
       backgroundColor: "#fff",
-      borderRadius: "12px",
-      boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-      border: "2px solid #e9ecef",
-      minHeight: "300px",
+      borderRadius: "8px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      border: "1px solid #e9ecef",
+      minHeight: "220px",
     },
     chartTitle: {
       color: "#2c3e50",
@@ -395,8 +388,8 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
       paddingBottom: "8px",
     },
     chartWrapper: {
-      height: "220px",
-      marginBottom: "10px",
+      height: "160px",
+      marginBottom: "8px",
     },
     chartLegend: {
       fontSize: "12px",
@@ -434,11 +427,12 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
       borderBottom: "2px solid #2980b9",
     },
     tableCell: {
-      padding: "12px",
+      padding: "8px",
       borderBottom: "1px solid #ecf0f1",
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
+      fontSize: "11px",
     },
     tableRowEven: {
       backgroundColor: "#f8f9fa",
@@ -447,11 +441,11 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
       backgroundColor: "#fff",
     },
     trendSection: {
-      padding: "15px",
+      padding: "10px",
       background: "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
-      borderRadius: "12px",
-      marginBottom: "20px",
-      border: "2px solid #2196f3",
+      borderRadius: "8px",
+      marginBottom: "15px",
+      border: "1px solid #2196f3",
     },
     remarksSection: {
       padding: "15px",
@@ -497,7 +491,7 @@ const IndividualReport = ({ student, classData, historicalData = [] }) => {
       alignItems: "center",
       justifyContent: "center",
       borderRadius: "8px",
-      backgroundColor: principalStamp ? "#fee2e2" : "transparent",
+      backgroundColor: "transparent",
     },
   };
 

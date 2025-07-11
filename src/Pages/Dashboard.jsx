@@ -103,7 +103,15 @@ const Dashboard = () => {
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      minHeight: '120px',
+      width: '100%',
+      maxWidth: '300px',
+      '@media (maxWidth: 768px)': {
+        padding: '20px 16px',
+        fontSize: '1rem',
+        minHeight: '100px'
+      }
     },
     openerButton: {
       background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
@@ -142,7 +150,7 @@ const Dashboard = () => {
             <img 
               src="/logschool.png" 
               alt="School Logo" 
-              style={{ width: '80px', height: '80px', borderRadius: '50%', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
+              style={{ width: '80px', height: '80px', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
             />
             <h1 style={styles.title}>Spring Valley Baptist School</h1>
           </div>

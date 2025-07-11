@@ -40,8 +40,21 @@ const Login = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: '"Inter", "Segoe UI", sans-serif'
+      backgroundImage: 'url(/Kids.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      fontFamily: '"Inter", "Segoe UI", sans-serif',
+      position: 'relative'
+    },
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(102, 126, 234, 0.7)',
+      zIndex: 1
     },
     card: {
       background: 'rgba(255, 255, 255, 0.95)',
@@ -51,7 +64,9 @@ const Login = () => {
       backdropFilter: 'blur(10px)',
       width: '100%',
       maxWidth: '420px',
-      textAlign: 'center'
+      textAlign: 'center',
+      position: 'relative',
+      zIndex: 2
     },
     title: {
       fontSize: '2.5rem',
@@ -114,6 +129,7 @@ const Login = () => {
 
   return (
     <div style={styles.container}>
+      <div style={styles.overlay}></div>
       <div style={styles.card}>
         <h1 style={styles.title}>Welcome Back</h1>
         <p style={styles.subtitle}>Sign in to access the exam system</p>

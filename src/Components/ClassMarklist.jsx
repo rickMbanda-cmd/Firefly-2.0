@@ -5,7 +5,7 @@ import { getSubjectsByClass, getSubjectDisplayName } from '../Utils/subjectsByCl
 // Add print styles for ClassMarklist
 // Print styles will be injected dynamically from the parent component
 
-const ClassMarklist = ({ students, selectedClass }) => {
+const ClassMarklist = ({ students, selectedClass, selectedTerm, selectedExamType }) => {
   // Get subjects based on the selected class or first student's class
   const currentClass = selectedClass || (students.length > 0 ? students[0].class : 'Grade 1');
   const subjects = getSubjectsByClass(currentClass);
@@ -29,7 +29,8 @@ const ClassMarklist = ({ students, selectedClass }) => {
   }, [students, subjects]);
 
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const examType = students.length > 0 ? students[0].examType : '';
+  const displayTerm = selectedTerm || (students.length > 0 ? students[0].term : 'Term 1');
+  const examType = selectedExamType || (students.length > 0 ? students[0].examType : '');
   const displayExamType = examType === 'opener' ? 'Opener' : 
                          examType === 'midterm' ? 'Midterm' : 
                          examType === 'endterm' ? 'Endterm' : examType;
@@ -82,7 +83,7 @@ const ClassMarklist = ({ students, selectedClass }) => {
     },
     reportTitle: {
       color: '#1e293b',
-      fontSize: '2rem',
+      fontSize: '1.2rem',
       fontWeight: '800',
       marginBottom: '12px',
       fontFamily: '"Inter", sans-serif',
@@ -265,7 +266,7 @@ const ClassMarklist = ({ students, selectedClass }) => {
       {/* Report Title Section */}
       <div style={styles.titleSection}>
         <h2 style={styles.reportTitle}>CLASS MARKLIST</h2>
-        {selectedClass && <p style={styles.subtitle}>{selectedClass}</p>}
+        {selectedClass && <p style={styles.subtitle}>{displayTerm} - {selectedClass}</p>}
         {displayExamType && <p style={styles.subtitle}>{displayExamType} - {currentDate}</p>}
       </div>
 
@@ -377,9 +378,12 @@ ClassMarklist.propTypes = {
       mean: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       rubric: PropTypes.string,
       class: PropTypes.string,
+      term: PropTypes.string,
     })
   ).isRequired,
   selectedClass: PropTypes.string,
+  selectedTerm: PropTypes.string,
+  selectedExamType: PropTypes.string,
 };
 
 
